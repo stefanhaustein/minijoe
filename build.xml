@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<project name="minijoe" basedir="." default="run-shell">
+
+  <!-- Note: Antenna must be on the classpath and the environment variablte
+             WTK_HOME must point to the Sun WTK home directory -->
+	
+  <taskdef resource="antenna.properties" />
+  <property environment="env" />
+  <property name="wtk.home" value="${env.WTK_HOME}" />	
+  <property name="wtk.cldc.version" value="1.1" />
+  <property name="wtk.midp.version" value="2.0" />
+  
+  <target name="clean">
+  	<deltree dir="tmp"/>
+  </target>
+  	
+  <target name="build-shell" depends="clean">
+  	<mkdir dir="bin" />
+  	<mkdir dir="tmp" />
+  	<mkdir dir="tmp/classes"/>
+  	
+	<wtkjad jadfile="bin/MjShell.jad" name="MinJoe Shell Demo"
+            vendor="Google" version="1.0.0">
+      <midlet name="MjShell" 
+		      class="com.google.minijoe.samples.shell.MjShell" />
+    </wtkjad>
+
+  	<wtkbuild srcdir="src" destdir="tmp/classes" preverify="false" >
+  	  <include name="com/google/minijoe/samples/shell/MjShell.java" />
+  	</wtkbuild>
+  	
+  	<wtkpackage jarfile="bin/MjShell.jar" jadfile="bin/MjShell.jad" 
+  		basedir="tmp/classes" preverify="false" obfuscate="false" >
+  	</wtkpackage>
+  	
+  	<wtkpreverify jarfile="bin/MjShell.jar" jadfile="bin/MjShell.jad" cldc="false" />
+  </target>
+
+  <target name="run-shell" depends="build-shell" >
+    <wtkrun jadfile="bin/MjShell.jad" />
+  </target>
+	
+  <target name="build-compiler" depends="clean">
+  	<mkdir dir="bin" />
+  	<mkdir dir="tmp/classes"/>
+    <javac srcdir="src" destdir="tmp/classes">
+  	  <include name="com/google/minijoe/samples/compiler/MjC.java" />
+    </javac>
+  	
+  	<jar basedir="classes" destfile="bin/MjC.jar" >
+  	  <manifest>
+  	  	<attribute name="Main-Class" value="com.google.minijoe.samples.compiler.MjC"/>
+  	  </manifest>
+    </jar>
+  </target>
+	
+  <target name="generate-bytecode" depends="build-compiler">
+  	<mkdir dir="tmp/res"/>
+	<java jar="bin/MjC.jar" args="javascript/canvasoids.js" 
+		  output="tmp/res/canvasoids.mjc" fork="true"/>
+	<java jar="bin/MjC.jar" args="javascript/canvasout.js" 
+		  output="tmp/res/canvasout.mjc" fork="true"/>
+	<java jar="bin/MjC.jar" args="javascript/clock.js" 
+		  output="tmp/res/clock.mjc" fork="true"/>
+	<java jar="bin/MjC.jar" args="javascript/functionplot.js" 
+		  output="tmp/res/functionplot.mjc" fork="true"/>
+	<java jar="bin/MjC.jar" args="javascript/helloworld.js" 
+		  output="tmp/res/helloworld.mjc" fork="true"/>
+  </target>
+  	
+  <target name="build-runtime" depends="generate-bytecode">	
+  	<deltree dir="tmp/classes" />
+  	<mkdir dir="tmp/classes" />
+  	
+	<wtkjad jadfile="bin/MjRuntime.jad" name="MinJoe Runtime Demo"
+            vendor="Google" version="1.0.0" update="false">
+      <midlet name="MjRuntime"  
+		      class="com.google.minijoe.samples.runtime.MjRuntime" />
+    </wtkjad>
+
+  	<wtkbuild srcdir="src" destdir="tmp/classes" preverify="false" >
+  	  <include name="com/google/minijoe/samples/runtime/MjRuntime.java" />
+  	</wtkbuild>
+  	
+  	<wtkpackage jarfile="bin/MjRuntime.jar" jadfile="bin/MjRuntime.jad" 
+  		basedir="tmp/classes" preverify="false" obfuscate="false" update="false">
+  	</wtkpackage>
+  	
+  	<wtkpreverify jarfile="bin/MjRuntime.jar" jadfile="bin/MjRuntime.jad" cldc="false" />
+  	
+  	<wtkpackage jarfile="bin/MjRuntime.jar" jadfile="bin/MjRuntime.jad" 
+  		basedir="tmp/res" preverify="false" obfuscate="false" update="true">
+  	</wtkpackage>
+
+  </target>
+
+  <target name="run-runtime" depends="build-runtime" >
+	<wtkrun jadfile="bin/MjRuntime.jad" />
+  </target>	
+</project>
