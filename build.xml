@@ -5,9 +5,10 @@
   <!-- Note: Antenna must be on the classpath and the environment variablte
              WTK_HOME must point to the Sun WTK home directory -->
 	
+  <property name="version" value="1.0" />
   <taskdef resource="antenna.properties" />
   <property environment="env" />
-  <property name="wtk.home" value="${env.WTK_HOME}" />	
+  <property name="wtk.home" value="${env.WTK_HOME}" />
   <property name="wtk.cldc.version" value="1.1" />
   <property name="wtk.midp.version" value="2.0" />
   
@@ -48,7 +49,7 @@
   	  <include name="com/google/minijoe/samples/compiler/MjC.java" />
     </javac>
   	
-  	<jar basedir="classes" destfile="bin/MjC.jar" >
+  	<jar basedir="tmp/classes" destfile="bin/MjC.jar" >
   	  <manifest>
   	  	<attribute name="Main-Class" value="com.google.minijoe.samples.compiler.MjC"/>
   	  </manifest>
@@ -100,13 +101,13 @@
   </target>	
 	
   <target name="zip" depends="build-runtime,build-shell">
-  	<zip destfile="minijoe.zip" basedir="..">
-  	  <include name="**/*.jad"/>
-  	  <include name="**/*.jar"/>
-  	  <include name="**/*.java"/>
-      <include name="**/*.js"/>
-      <include name="**/*.html"/>
-      <include name="**/*.build.xml"/>
+  	<zip destfile="minijoe-${version}.zip" basedir="..">
+  	  <include name="minijoe/**/*.jad"/>
+  	  <include name="minijoe/**/*.jar"/>
+  	  <include name="minijoe/**/*.java"/>
+      <include name="minijoe/**/*.js"/>
+      <include name="minijoe/**/*.html"/>
+      <include name="minijoe/*.build.xml"/>
   	</zip>	
   </target>	
 </project>
