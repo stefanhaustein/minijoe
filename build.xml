@@ -98,4 +98,15 @@
   <target name="run-runtime" depends="build-runtime" >
 	<wtkrun jadfile="bin/MjRuntime.jad" />
   </target>	
+	
+  <target name="zip" depends="build-runtime,build-shell">
+  	<zip destfile="minijoe.zip" basedir="..">
+  	  <include name="**/*.jad"/>
+  	  <include name="**/*.jar"/>
+  	  <include name="**/*.java"/>
+      <include name="**/*.js"/>
+      <include name="**/*.html"/>
+      <include name="**/*.build.xml"/>
+  	</zip>	
+  </target>	
 </project>
