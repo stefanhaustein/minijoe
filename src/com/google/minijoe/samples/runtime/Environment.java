@@ -176,6 +176,7 @@ public class Environment extends JsObject implements Runnable {
         JsFunction call = (JsFunction) next[2];
         synchronized (eventLock) {
           eventLock.wait (Math.max(5, time - System.currentTimeMillis()));
+          // Note: stack[0] is filled with 'this' in the constructor 
           stack.setObject(1, this);
           stack.setObject(2, call);
           call.eval(stack, 1, 0);
