@@ -613,13 +613,16 @@ public class JsFunction extends JsObject {
               break;
 
             case OP_GT:
-              // System.out.println(""+Obj.fpToString(stack.getFP(sp-2))+ " > "+
-              // Obj.fpToString(stack.getFP(sp-1))+ " = "+ (stack.getFP(sp-2) >
-              // stack.getFP(sp-1)));
-              stack.setObject(sp - 2,
-                  stack.getNumber(sp - 2) > stack.getNumber(sp - 1)
+              if (stack.isNumber(sp - 2) && stack.isNumber(sp - 1)) {
+                stack.setObject(sp - 2,
+                    stack.getNumber(sp - 2) > stack.getNumber(sp - 1)
                       ? Boolean.TRUE
                       : Boolean.FALSE);
+              } else {
+                stack.setObject(sp - 2,
+                    stack.getString(sp - 2).compareTo(stack.getString(sp - 1)) 
+                    > 0 ? Boolean.TRUE : Boolean.FALSE);
+              }
               sp--;
               break;
 
@@ -655,15 +658,17 @@ public class JsFunction extends JsObject {
               break;
 
             case OP_LT:
-              // System.out.println(""+Obj.fpToString(stack.getFP(sp-2))+ " < "+
-              // Obj.fpToString(stack.getFP(sp-1))+ " = "+ (stack.getFP(sp-2) <
-              // stack.getFP(sp-1)));
-              stack.setObject(sp - 2,
-                  stack.getNumber(sp - 2) < stack.getNumber(sp - 1)
-                      ? Boolean.TRUE : Boolean.FALSE);
+              if (stack.isNumber(sp - 2) && stack.isNumber(sp - 1)) {
+                stack.setObject(sp - 2, stack.getNumber(sp - 2) < 
+                    stack.getNumber(sp - 1) ? Boolean.TRUE : Boolean.FALSE);
+              } else {
+                stack.setObject(sp - 2, stack.getString(sp - 2).
+                    compareTo(stack.getString(sp - 1)) < 0
+                    ? Boolean.TRUE : Boolean.FALSE);
+              }
               sp--;
               break;
-
+              
             case OP_MOD:
               stack.setNumber(sp - 2,
                   (stack.getNumber(sp - 2) % (stack.getNumber(sp - 1))));
