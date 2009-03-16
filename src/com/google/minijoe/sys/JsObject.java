@@ -430,7 +430,7 @@ public class JsObject  {
   /** 
    * Execute java member implementation. Parameters for functions start at 
    * stack[sp+2]. Function and getter results are returned at stack[sp+0].
-   * Setter and getter parameters are starting at stack[sp+0]. 
+   * The assignement value for a setter is stored at stack[sp+0]. 
    */
   public void evalNative(int index, JsArray stack, int sp, int parCount) {
     switch(index){
@@ -859,16 +859,16 @@ public class JsObject  {
 
       case ID_TO_LOWER_CASE: //TODO: which locale to use as defautlt? us?
       case ID_TO_LOCALE_LOWER_CASE:
-        stack.setObject(sp, stack.getString(sp).toLowerCase());
+        stack.setObject(sp, stack.getString(sp + 2).toLowerCase());
         break;
 
       case ID_TO_UPPER_CASE: //TODO: which locale to use as defautlt? us?
       case ID_TO_LOCALE_UPPER_CASE:
-        stack.setObject(sp, stack.getString(sp).toLowerCase());
+        stack.setObject(sp, stack.getString(sp + 2).toUpperCase());
         break;
 
       case ID_LENGTH:
-        stack.setInt(sp, stack.getString(sp).length());
+        stack.setInt(sp, toString().length());
         break;
         
       case ID_LENGTH_SET:
