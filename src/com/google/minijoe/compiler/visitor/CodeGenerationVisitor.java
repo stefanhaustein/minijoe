@@ -842,7 +842,7 @@ public class CodeGenerationVisitor implements Visitor {
     String saveTryLabel = currentTryLabel;
 
     currentTryStatement = statement;
-    currentTryLabel = statement.catchBlock == null ? "catch" : "finally";
+    currentTryLabel = statement.catchBlock != null ? "catch" : "finally";
 
     statement.tryBlock.visitStatement(this);
 
@@ -1055,7 +1055,7 @@ public class CodeGenerationVisitor implements Visitor {
       writeXop(JsFunction.XOP_CALL, expression.arguments.length);
     } else {
       writeXop(JsFunction.XOP_TRY_CALL, expression.arguments.length);
-      writeJump(JsFunction.XOP_GO, currentTryStatement, currentTryLabel);
+      writeJump(JsFunction.XOP_IF, currentTryStatement, currentTryLabel);
     }
     return expression;
   }
