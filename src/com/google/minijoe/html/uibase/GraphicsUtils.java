@@ -319,7 +319,11 @@ public class GraphicsUtils {
       pos = bp;
     }
 
-    return (String[]) lines.toArray(new String[lines.size()]);
+    String[] result = new String[lines.size()];
+    for (int i = 0; i < result.length; i++) {
+        result[i] = (String) lines.elementAt(i);
+    }
+    return result;
   }
 
   public static int findBreakPosition(String text, int pos, Font font, int maxWidth) {
