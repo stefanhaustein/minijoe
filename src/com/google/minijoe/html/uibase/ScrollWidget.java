@@ -246,7 +246,7 @@ public class ScrollWidget extends Widget {
     int bestDq = 0;
 
     for (int i = 0; i < cnt; i++) {
-      Widget cand = (Widget) focusable.get(i);
+      Widget cand = (Widget) focusable.elementAt(i);
       cand.getRelativeCoords(this, coords);
 
       int dx = coords[0] - x;
