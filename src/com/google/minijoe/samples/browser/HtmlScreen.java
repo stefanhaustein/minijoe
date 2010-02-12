@@ -108,7 +108,6 @@ public class HtmlScreen extends Canvas implements Window {
 	invalidate(true);
   }
   
-  @Override
   protected void paint(Graphics g) {
 	if (!layoutValid) {
       root.setDimensions(0, 0, getWidth(), getHeight());
