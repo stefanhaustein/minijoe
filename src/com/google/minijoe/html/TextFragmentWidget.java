@@ -413,7 +413,6 @@ public class TextFragmentWidget extends Widget {
         " lastYOffs: " + lastLineYOffset);
   }
 
-  @Override
   public void doLayout(int maxWidth) {
 	// Do nothing -- handled by BlockWidget.
   }
