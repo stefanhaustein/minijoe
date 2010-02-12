@@ -208,15 +208,17 @@ public class InputWidget extends BlockWidget {
   }
 
   public void setText(String text) {
+	this.text = text;
     if (type == Skin.INPUT_TYPE_TEXTAREA) {
       while (element.getChildCount() > 0) {
         element.remove(element.getChildCount() - 1);
       }
       element.addText(text);
+      invalidate(true);
     } else {
       element.setAttribute("value", text);
+      invalidate(false);
     }
-    invalidate(true);
   }
 
   /**
