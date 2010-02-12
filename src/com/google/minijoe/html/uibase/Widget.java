@@ -172,7 +172,7 @@ public class Widget {
       if (cx + c.getWidth() >= wx && cx <= wx + ww && 
           cy + c.getHeight() >= wy && cy <= wy + wh) {
         if (c.isFocusable()) {
-          result.add(c);
+          result.addElement(c);
         }
         c.findFocusableWidgets(wx - cx, wy - cy, ww, wh, result);
       }
@@ -180,7 +180,7 @@ public class Widget {
   }
 
   public final Widget getChild(int i) {
-    return (Widget) children.get(i);
+    return (Widget) children.elementAt(i);
   }
 
   public final int getChildCount() {
