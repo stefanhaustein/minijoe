@@ -72,7 +72,6 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
   public HtmlBrowser() {    
   }
 
-  @Override
   protected void startApp() throws MIDletStateChangeException {
 
     display = Display.getDisplay(this);
@@ -269,7 +268,7 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
     currentInput = source;
     list.deleteAll();
     for (int i = 0; i < options.size(); i++) {
-      list.append((String) options.get(i), null);
+      list.append((String) options.elementAt(i), null);
     }
     if (selectedIndex >= 0) {
       list.setSelectedIndex(selectedIndex, true);
