@@ -915,9 +915,7 @@ public class BlockWidget extends Widget {
   }
 
   /**
-   * Draws the border and fills the are with the background color if set. If the
-   * layout of this component is not marked as valid, doLayout() is called prior
-   * to any rendering.
+   * Draws the border and fills the area with the background color if set. 
    */
   public void drawContent(Graphics g, int dx, int dy) {
     dx += boxX;
