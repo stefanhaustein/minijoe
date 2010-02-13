@@ -107,8 +107,6 @@ public class ResourceRequester implements Runnable {
           if (name == null) {
             break;
           }
-          System.out.println(name + ": " + httpCon.getHeaderField(headerIndex));
-
           name = name.toLowerCase();
 
           if ("content-type".equals(name)) {

@@ -119,6 +119,8 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
   public void requestResource(HtmlWidget source, int requestMethod, 
       String url, int expectedContentType, byte[] data) {
 
+	System.out.println("Request: " + url);  
+	  
     if (requestQueue.size() >= threadCount && threadCount < 4) {
       threadCount++;
       new Thread(this).start();
