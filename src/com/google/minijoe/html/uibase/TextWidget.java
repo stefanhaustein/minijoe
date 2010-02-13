@@ -58,6 +58,10 @@ public class TextWidget extends Widget {
   }
 
   public void drawContent(Graphics g, int dx, int dy) {
+    if (text == null) {
+      return;
+    }
+    
     g.setColor(backgroundColor);
     g.fillRect(dx, dy, getWidth(), getHeight());
 
@@ -71,7 +75,7 @@ public class TextWidget extends Widget {
         x0 = dx + getWidth() - 2;
         break;
       case Graphics.HCENTER:
-        x0 = getWidth() / 2;
+        x0 = dx + getWidth() / 2;
         break;
       default:
         x0 = dx + 2;

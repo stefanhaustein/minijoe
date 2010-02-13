@@ -103,7 +103,7 @@ public class TextFragmentWidget extends Widget {
     BlockWidget parent = (BlockWidget) getParent();
 
     Font font = getFont();
-    int maxWidth = getWidth();
+    int maxWidth = borders.getMaxWidth();
     int fontHeight = font.getHeight();
 
     int availableWidth = borders.getHorizontalSpace(fontHeight);
@@ -145,8 +145,7 @@ public class TextFragmentWidget extends Widget {
       buf.append((char) lastBreak);
       buf.append((char) (end - lastBreak));
       
-      int w = Math.min(font.substringWidth(text, lastBreak, end - lastBreak), 
-          maxWidth);
+      int w = Math.min(font.substringWidth(text, lastBreak, end - lastBreak),  maxWidth);
       
       if (lineStartIndex != insertionIndex) {
         ((BlockWidget) getParent()).adjustLine(lineStartIndex, 
@@ -162,8 +161,7 @@ public class TextFragmentWidget extends Widget {
       lastBreak = breakPos;
       
       availableWidth = borders.getHorizontalSpace(fontHeight);
-      breakPos = Math.max(lastBreak, 
-          findBreakPosition(parent, myIndex, lastBreak, availableWidth, 
+      breakPos = Math.max(lastBreak, findBreakPosition(parent, myIndex, lastBreak, availableWidth, 
           availableWidth == maxWidth));
       
       h += fontHeight;

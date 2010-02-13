@@ -41,6 +41,7 @@ public class HtmlScreen extends Canvas implements Window {
   TextWidget titleWidget;
   TextWidget lskWidget;
   TextWidget rskWidget;
+  TextWidget statusWidget;
   String url;
   boolean layoutValid;
   Font ctrlFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_SMALL);
@@ -54,10 +55,14 @@ public class HtmlScreen extends Canvas implements Window {
 
     lskWidget = new TextWidget(ctrlFont);
     rskWidget = new TextWidget(ctrlFont);
+    statusWidget = new TextWidget(ctrlFont);
     lskWidget.setBackgroundColor(SOFTKEY_BG);
     rskWidget.setBackgroundColor(SOFTKEY_BG);
     lskWidget.setTextColor(0xffffff);
     rskWidget.setTextColor(0xffffff);
+    statusWidget.setBackgroundColor(0x0cccccc);
+    statusWidget.setTextColor(0);
+    statusWidget.setBorderColor(0x0888888);
     
     lskWidget.setText("Options");
     lskWidget.setAlign(Graphics.LEFT);
@@ -81,6 +86,7 @@ public class HtmlScreen extends Canvas implements Window {
     scrollWidget.addChild(htmlWidget);
     
     root.addChild(scrollWidget);
+    root.addChild(statusWidget);
     scrollWidget.requestFocus();
 
     setFullScreenMode(true);
@@ -92,6 +98,13 @@ public class HtmlScreen extends Canvas implements Window {
 	if (title != null && title.trim().length() != 0) {
 	  titleWidget.setText(htmlWidget.getTitle());	
 	}
+	titleWidget.setWidth(Math.max(getWidth(), htmlWidget.getWidth()));
+	
+	statusWidget.setText(status);
+	if (status != null) {
+	  statusWidget.setWidth(Math.min(getWidth() * 3 / 2, ctrlFont.stringWidth(status) + 4));
+	}
+	
   }
   
   public Widget getRoot() {
@@ -105,6 +118,7 @@ public class HtmlScreen extends Canvas implements Window {
 	root.setDimensions(0, 0, w, h);
 	scrollWidget.setDimensions(0, 0, w, h - skh);
 	titleWidget.setWidth(Math.max(w, htmlWidget.getWidth()));
+    statusWidget.setY(h - 2 * skh);
 	invalidate(true);
   }
   

@@ -81,9 +81,9 @@ public class InputWidget extends BlockWidget {
   }
 
 
-  protected void calculateWidth(int containerWidth) {
+  protected void calculateWidth(int containerWidth, int viewportWidth) {
     if (type == Skin.INPUT_TYPE_BUTTON) {
-      super.calculateWidth(containerWidth);
+      super.calculateWidth(containerWidth, viewportWidth);
       return;
     }
 
@@ -146,25 +146,26 @@ public class InputWidget extends BlockWidget {
   /**
    * {@inheritDoc}
    */
-  public void doLayout(int maxWidth, LayoutContext border, boolean shrinkWrap) {
+  public void doLayout(int outerMaxWidth, int viewportWidth, LayoutContext border, 
+      boolean shrinkWrap) {
 
-    if (containingWidth == maxWidth && layoutValid) {
+    if (containingWidth == outerMaxWidth && layoutValid) {
       return;
     }
 
     if (type == Skin.INPUT_TYPE_BUTTON) {
-      super.doLayout(maxWidth, border, shrinkWrap);
+      super.doLayout(outerMaxWidth, viewportWidth, border, shrinkWrap);
       return;
     }
 
-    this.containingWidth = maxWidth;
+    this.containingWidth = outerMaxWidth;
     Style style = element.getComputedStyle();
-    int top = style.getPx(Style.MARGIN_TOP, maxWidth);
-    int bottom = style.getPx(Style.MARGIN_BOTTOM, maxWidth);
+    int top = style.getPx(Style.MARGIN_TOP, outerMaxWidth);
+    int bottom = style.getPx(Style.MARGIN_BOTTOM, outerMaxWidth);
     int fh = style.getFont().getHeight();
 
-    boxWidth = Math.min(maxWidth, style.lengthIsFixed(Style.WIDTH, true) 
-        ? getSpecifiedWidth(maxWidth) : getMinimumWidth(maxWidth));
+    boxWidth = Math.min(outerMaxWidth, style.lengthIsFixed(Style.WIDTH, true) 
+        ? getSpecifiedWidth(outerMaxWidth) : getMinimumWidth(outerMaxWidth, viewportWidth));
 
     switch(type) {
       case Skin.INPUT_TYPE_TEXTAREA:

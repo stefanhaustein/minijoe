@@ -62,22 +62,22 @@ public class TableWidget extends BlockWidget {
   /**
    * {@inheritDoc}
    */
-  protected void calculateWidth(int parentWidth) {
+  protected void calculateWidth(int parentWidth, int viewportWidth) {
     widthValid = true;
-    formatTable(parentWidth, false, true);
+    formatTable(parentWidth, viewportWidth, false, true);
   }
   
   /**
    * {@inheritDoc}
    */
-  public void doLayout(int containerWidth, LayoutContext borders, 
+  public void doLayout(int containerWidth, int viewportWidth, LayoutContext borders, 
       boolean shrinkWrap) {
     if (layoutValid && containerWidth == containingWidth && borders == null) {
       return;
     }
     layoutValid = true;
     this.containingWidth = containerWidth;
-    formatTable(containerWidth, shrinkWrap, false);
+    formatTable(containerWidth, viewportWidth, shrinkWrap, false);
     if (borders != null) {
       borders.advance(boxHeight);
     }
@@ -93,7 +93,7 @@ public class TableWidget extends BlockWidget {
    *    maxWidth, not performing the actual table layout. Used in 
    *    calculateWidth().
    */
-  private void formatTable(int containerWidth, boolean shrinkWrap, 
+  private void formatTable(int containerWidth, int viewportWidth, boolean shrinkWrap, 
       boolean measureOnly) {
     // This method is rather long. Unfortunately, splitting it up would mean 
     // - handing over a lot of variables, 
@@ -123,7 +123,7 @@ public class TableWidget extends BlockWidget {
     int minInnerWidth = 0;
 
     if (shrinkWrap) {
-      maxInnerWidth = getMaximumWidth(containerWidth);
+      maxInnerWidth = getMaximumWidth(containerWidth, viewportWidth);
     } else if (style.lengthIsFixed(Style.WIDTH, true)){
       maxInnerWidth = style.getPx(Style.WIDTH, containerWidth);
       minInnerWidth = maxInnerWidth;
@@ -200,11 +200,11 @@ public class TableWidget extends BlockWidget {
         BlockWidget cell = (BlockWidget) children.elementAt(rowCount + i);
         column = cols[i];
         minWidths[column] = Math.max(minWidths[column], 
-            cell.getMinimumWidth(maxInnerWidth));
+            cell.getMinimumWidth(maxInnerWidth, viewportWidth));
         specWidths[column] = Math.max(specWidths[column], 
             cell.getSpecifiedWidth(maxInnerWidth));
         maxWidths[column] = Math.max(maxWidths[column], 
-            cell.getMaximumWidth(maxInnerWidth));
+            cell.getMaximumWidth(maxInnerWidth, viewportWidth));
         Style cellStyle = cell.getElement().getComputedStyle();
         isFixed[column] |= cellStyle.lengthIsFixed(Style.WIDTH, false);
        // ||(cellStyle.lengthIsFixed(Style.WIDTH, true) && specWidths[column] 
@@ -232,9 +232,9 @@ public class TableWidget extends BlockWidget {
           div = span;
         }
         min = Math.max(
-            (cell.getMinimumWidth(maxInnerWidth) - min + div - 1) / div, 0);
+            (cell.getMinimumWidth(maxInnerWidth, viewportWidth) - min + div - 1) / div, 0);
         max = Math.max(
-            (cell.getMaximumWidth(maxInnerWidth) - max + div - 1) / div, 0);
+            (cell.getMaximumWidth(maxInnerWidth, viewportWidth) - max + div - 1) / div, 0);
         
         for (int j = 0; j < span; j++) {
           if (div == span || !isFixed[column + j]) {
@@ -367,7 +367,7 @@ public class TableWidget extends BlockWidget {
         skipRows.setCharAt(column + j, (char) rowSpans[i]);
       }
       
-      cell.doLayout(w, null, false);
+      cell.doLayout(w, viewportWidth, null, false);
       currentX += w;
       column += colSpans[i];
     }

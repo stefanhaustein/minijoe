@@ -149,6 +149,10 @@ public class LayoutContext {
     //    Assert.assertEquals(0, borders.length() % 3);
   }
 
+  public int getMaxWidth() {
+    return maxWidth;
+  }
+  
   /** 
    * Places a box with the given width and height. If the box is not a floating
    * element, the lineHeight becomes the maximum of the line height and 

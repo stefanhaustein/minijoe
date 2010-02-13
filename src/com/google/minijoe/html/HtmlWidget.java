@@ -152,31 +152,29 @@ public class HtmlWidget extends BlockWidget  {
     }
   }
 
-  public void doLayout(int width) {
+  public void doLayout(int viewportWidth) {
     if (element == null) {
       return;
     }
 
-    if (!layoutValid || width != getWidth()) {
+    if (!layoutValid || viewportWidth != getWidth()) {
       layoutValid = false;
       
       if (desktopRendering) {
-        int minW = getMinimumWidth(HIGH_VIEWPORT_WIDTH);
-        if (minW > width) {
-          width = minW > MEDIUM_VIEWPORT_WIDTH ? 
+        int minWidth = getMinimumWidth(HIGH_VIEWPORT_WIDTH, HIGH_VIEWPORT_WIDTH);
+        if (minWidth > viewportWidth) {
+          viewportWidth = minWidth > MEDIUM_VIEWPORT_WIDTH ? 
             HIGH_VIEWPORT_WIDTH : MEDIUM_VIEWPORT_WIDTH;
         } 
+        setWidth(viewportWidth);
+        doLayout(viewportWidth, viewportWidth, null, false);
       } else {
-        int minW = getMinimumWidth(width);
-        // This is really ugly. We probably need to store the window / target width somewhere,
-        // So we can make the total page larger, but still limit text blocks / colums
-        // to the screen width
-        if (minW > width * 120 / 100) {
-          width = minW;
-        }
+        int minW = getMinimumWidth(viewportWidth, viewportWidth);
+        int w = Math.max(minW, viewportWidth);
+        setWidth(w);
+        // TODO(haustein) We may need to make the viewport width available to calculations...
+        doLayout(w, viewportWidth, null, false);
       }
-      setWidth(width);
-      doLayout(width, null, false);
     }
   }
 
@@ -199,8 +197,7 @@ public class HtmlWidget extends BlockWidget  {
         encoding = "UTF-8";
       }
       parser.setInput(is, encoding);
-      parser
-      .setFeature("http://xmlpull.org/v1/doc/features.html#relaxed", true);
+      parser.setFeature("http://xmlpull.org/v1/doc/features.html#relaxed", true);
 
       for (int i = 0; i < HTML_ENTITY_TABLE.length; i += 2) {
         parser.defineEntityReplacementText(HTML_ENTITY_TABLE[i], HTML_ENTITY_TABLE[i + 1]);

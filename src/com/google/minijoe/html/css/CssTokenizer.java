@@ -465,25 +465,26 @@ public class CssTokenizer {
     System.out.print(msg + " line: " + lineNumber + "; token: ");
     switch (ttype) {
       case TT_IDENT:
-        System.out.println("identifier '" + sval + "'");
+        System.out.print("identifier '" + sval + "'");
         break;
       case TT_STRING:
-        System.out.println("string '" + sval + "'");
+        System.out.print("string '" + sval + "'");
         break;
       case TT_URI:
-        System.out.println("uri '" + sval + "'");
+        System.out.print("uri '" + sval + "'");
         break;
       case TT_NUMBER:
       case TT_DIMENSION:
       case TT_PERCENTAGE:
-        System.out.println("numeric " + nval + " unit: " + sval);
+        System.out.print("numeric " + nval + " unit: " + sval);
         break;
       default:
         if (ttype <= ' ') {
-          System.out.println(ttype);
+          System.out.print(ttype);
         } else {
-          System.out.println((char) ttype);
+          System.out.print((char) ttype);
         }
     }
+    System.out.println(" url: " + url);
   }
 }

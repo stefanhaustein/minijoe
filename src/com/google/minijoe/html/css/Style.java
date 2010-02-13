@@ -59,6 +59,7 @@ public class Style {
   public static final int BACKGROUND_POSITION_X = 17; 
   public static final int BACKGROUND_POSITION_Y = 18;
   public static final int BACKGROUND_REPEAT = 19;
+  
   public static final int BORDER_TOP_COLOR = 20;
   public static final int BORDER_RIGHT_COLOR = 21;
   public static final int BORDER_BOTTOM_COLOR = 22;
@@ -93,10 +94,15 @@ public class Style {
   public static final int VERTICAL_ALIGN = 51;
   public static final int WIDTH = 52;
   public static final int Z_INDEX = 53;
+  
+  private static final int BORDER_TOP_SPACING = 54;
+  private static final int BORDER_RIGHT_SPACING = 55;
+  private static final int BORDER_BOTTOM_SPACING = 56;
+  private static final int BORDER_LEFT_SPACING = 57;
 
   // all inherited properties and the background color
   private static final int TEXT_PROPERTY_COUNT = 17;
-  private static final int PROPERTY_COUNT = 54;
+  private static final int PROPERTY_COUNT = 58;
 
   /**
    * Flag for -top/-right/-bottom/-left abbreviation multiple value property
@@ -324,7 +330,6 @@ public class Style {
 
     addName("background", MULTIVALUE_BACKGROUND);
     addName("background-color", BACKGROUND_COLOR);
-    //       background-position
     addName("background-position", MULTIVALUE_BACKGROUND_POSITION);
     addName("background-repeat", BACKGROUND_REPEAT);
     addName("border", MULTIVALUE_BORDER | MULTIVALUE_TRBL);
@@ -332,6 +337,7 @@ public class Style {
     addName("border-color", MULTIVALUE_TRBL | BORDER_TOP_COLOR);
     addName("border-style", MULTIVALUE_TRBL | BORDER_TOP_STYLE);
     addName("border-width", MULTIVALUE_TRBL | BORDER_TOP_WIDTH);
+    addName("border-spacing", MULTIVALUE_TRBL | BORDER_TOP_SPACING);
     addName("bottom", BOTTOM);
     addName("caption-side", CAPTION_SIDE);
     addName("clear", CLEAR);
@@ -343,6 +349,7 @@ public class Style {
     addName("font", MULTIVALUE_FONT);
     addName("font-weight", FONT_WEIGHT);
     addName("font-size", FONT_SIZE);
+    
     addName("height", HEIGHT);
     addName("left", LEFT);
     addName("list-style", MULTIVALUE_LIST_STYLE);
@@ -365,15 +372,22 @@ public class Style {
     addName("width", WIDTH);
     addName("z-index", Z_INDEX);
 
+    // special-cased in url handler
+    addName("background-image", UNRECOGNIZED_PROPERTY_ID);
+    // ignored
+    addName("font-family", UNRECOGNIZED_PROPERTY_ID);
+    addName("text-size", UNRECOGNIZED_PROPERTY_ID);
+
     for (int i = 0; i < 4; i++) {
       addName("border" + TRBL[i] + "-color", BORDER_TOP_COLOR + i);
       addName("border" + TRBL[i] + "-style", BORDER_TOP_STYLE + i);
       addName("border" + TRBL[i] + "-width", BORDER_TOP_WIDTH + i);
+      addName("border" + TRBL[i] + "-spacing", BORDER_TOP_SPACING + i);
       addName("border" + TRBL[i], MULTIVALUE_BORDER | i);
       addName("margin" + TRBL[i], MARGIN_TOP + i);
       addName("padding" + TRBL[i], PADDING_TOP + i);
     }
-
+    
     addValue("auto", AUTO, ENUM);
     addValue("none", NONE, ENUM);
     addValue("hidden", HIDDEN, ENUM);
@@ -471,6 +485,7 @@ public class Style {
     addValue("black", 0xff000000, ARGB);
     addValue("silver", 0xffc0c0c0, ARGB); 
     addValue("gray", 0xff808080, ARGB);
+    
   }
 
   private static void addName(String name, int id) {
@@ -962,11 +977,14 @@ public class Style {
     while (tokenizer.ttype != CssTokenizer.TT_EOF && tokenizer.ttype != '}') {
       if (tokenizer.ttype == CssTokenizer.TT_IDENT) {
         String name = tokenizer.sval;
-        Integer id = (Integer) NAME_TO_ID_MAP.get(name);
-        if (id == null) {
+        Integer idObj = (Integer) NAME_TO_ID_MAP.get(name);
+        int id;
+        if (idObj == null) {
           tokenizer.debug("unrecognized property");
           id = UNRECOGNIZED_PROPERTY;
-        } 
+        } else {
+          id = idObj.intValue();
+        }
         tokenizer.nextToken(false);
         if (tokenizer.ttype != ':') {
           continue;
@@ -978,35 +996,34 @@ public class Style {
 
           switch (tokenizer.ttype) {
             case CssTokenizer.TT_HASH:
-              setColor(id.intValue(), '#' + tokenizer.sval, pos);
+              setColor(id, '#' + tokenizer.sval, pos);
               break;
 
             case CssTokenizer.TT_DIMENSION:
-              set(id.intValue(), tokenizer.nval, 
+              set(id, tokenizer.nval, 
                   (byte) Util.indexOf(UNIT_NAMES, tokenizer.sval.toLowerCase()), pos);
               break;
 
             case CssTokenizer.TT_NUMBER:
-              set(id.intValue(), tokenizer.nval, NUMBER, pos);
+              set(id, tokenizer.nval, NUMBER, pos);
               break;
 
             case CssTokenizer.TT_PERCENTAGE:
-              set(id.intValue(), tokenizer.nval, PERCENT, pos);
+              set(id, tokenizer.nval, PERCENT, pos);
               break;
 
             case CssTokenizer.TT_IDENT:
               Long v = (Long) VALUE_TO_ID_MAP.get(tokenizer.sval);
               if (v != null) {
-                set(id.intValue(), (int) v.longValue(),
+                set(id, (int) v.longValue(),
                     (byte) (v.longValue() >>> 32), pos);
-              } else if (id != UNRECOGNIZED_PROPERTY) {
-                tokenizer.debug("Unrecognized value");
+              } else if (id != UNRECOGNIZED_PROPERTY && id != MULTIVALUE_FONT) {
+                tokenizer.debug("Unrecognized value '" + v + "' for property " + name);
               }
               break;
 
             case CssTokenizer.TT_URI:
-              if (id.intValue() == MULTIVALUE_BACKGROUND || 
-                  "background-image".equals(name)) {
+              if (id == MULTIVALUE_BACKGROUND || "background-image".equals(name)) {
                 backgroundImage = new Image[1];
                 backgroundImage[0] = (Image) 
                 tokenizer.htmlWidget.getResource(tokenizer.sval, 
@@ -1032,7 +1049,7 @@ public class Style {
         tokenizer.nextToken(false);
         if (tokenizer.ttype == CssTokenizer.TT_IDENT && 
             "important".equals(tokenizer.sval)) {
-          //          specificity = StyleSheet.SPECIFICITY_IMPORTANT;
+          specificity = StyleSheet.SPECIFICITY_IMPORTANT;
           tokenizer.nextToken(false);
         }
       }

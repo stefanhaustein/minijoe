@@ -77,16 +77,18 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
     display = Display.getDisplay(this);
 
     StringBuffer menu = new StringBuffer("<html><head><title>Bookmarks</title></head><body><ul>");
-
+    
     addLink(menu, "http://hsivonen.iki.fi/test/xhtml-suite/xhtml-basic.xhtml");
-    addLink(menu, "http://wap.cellufun.com/games.asp?g=mob&f=admobmw");
-    addLink(menu, "http://moblogga.mobi/");
-    addLink(menu, "http://freesim.o2.co.uk/R4QAYdLT");
-    addLink(menu, 
-    "http://www.bigbaer.com/css_tutorials/css.float.html.tutorial.htm");
-    addLink(menu, "http://m.google.com");
+    addLink(menu, "http://www.google.com/m");
     addLink(menu, "http://mobile.google.com");
     addLink(menu, "http://wwf.mobi/");
+    addLink(menu, "http://www.bigbaer.com/css_tutorials/css.float.html.tutorial.htm");
+    addLink(menu, "http://m.wikipedia.org");
+    addLink(menu, "http://mobile.wikipedia.org");
+    addLink(menu, "http://moblogga.mobi/");
+    addLink(menu, "http://qeep.mobi/xmps/homepage.do");
+    addLink(menu, "http://wap.cellufun.com/games.asp?g=mob&f=admobmw");
+    addLink(menu, "http://freesim.o2.co.uk/R4QAYdLT");
 
     try {
       HtmlScreen scr = showPage(null);

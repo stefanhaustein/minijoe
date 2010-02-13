@@ -33,7 +33,8 @@ import javax.microedition.lcdui.Image;
 public class ResourceRequester implements Runnable {
 
   static final String USER_AGENT = 
-    "Mozilla/5.0 (SymbianOS/9.1; U; [en-us]) AppleWebKit/413 (KHTML, like Gecko) Safari/413";
+    "NokiaN70-1/2.0539.1.2 Series60/2.8 Profile/MIDP-2.0 Configuration/CLDC-1.1";
+//    "Mozilla/5.0 (SymbianOS/9.1; U; [en-us]) AppleWebKit/413 (KHTML, like Gecko) Safari/413";
   //  "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11";
   //  "My own browser";//"NokiaN70-1/5.0609.2.0";
 

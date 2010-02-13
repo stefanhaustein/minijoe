@@ -351,8 +351,8 @@ public class BlockWidget extends Widget {
    *        element where the width is not limited by the with of the display 
    *        but must be determined from the content width.
    */
-  public void doLayout(int outerMaxWidth, LayoutContext parentLayoutContext, 
-      boolean shrinkWrap) {
+  public void doLayout(int outerMaxWidth, final int viewportWidth, 
+      LayoutContext parentLayoutContext, boolean shrinkWrap) {
 
     // If the with did not change and none of the children changed and the
     // layout is not influenced by flow objects of the parent, we do not
@@ -399,7 +399,7 @@ public class BlockWidget extends Widget {
     if (shrinkWrap) {
       outerMaxWidth = style.lengthIsFixed(Style.WIDTH, true)
       ? style.getPx(Style.WIDTH, outerMaxWidth) + left + right
-          : Math.min(outerMaxWidth, getMaximumWidth(containingWidth));
+          : Math.min(outerMaxWidth, getMaximumWidth(containingWidth, viewportWidth));
       // Otherwise, if this is not a table cell and the width is fixed, we need 
       // to calculate the value for auto margins here (This is typically used 
       // to center the contents).
@@ -437,7 +437,7 @@ public class BlockWidget extends Widget {
       if (fixedHeight && fixedWidth) {
         int w = style.getPx(Style.WIDTH, containingWidth);
         int h = style.getPx(Style.HEIGHT, containingWidth);
-        if (w != image.getWidth() || h != image.getHeight()) {
+        if ((w != image.getWidth() || h != image.getHeight()) && w > 0 && h > 0) {
           image = GraphicsUtils.createScaledImage(image, 0, 0, image.getWidth(), 
               image.getHeight(), w, h, GraphicsUtils.SCALE_SIMPLE | GraphicsUtils.SCALE_PROCESS_ALPHA);
         }
@@ -459,9 +459,10 @@ public class BlockWidget extends Widget {
     int innerMaxWidth = outerMaxWidth - left - right;
 
     // Keeps track of y-position and borders for the regular layout set by
-    // floating elements
-    LayoutContext layoutContext = new LayoutContext(innerMaxWidth, style, 
-        parentLayoutContext, left, top);
+    // floating elements. The viewport width is taken into account here.
+    LayoutContext layoutContext = new LayoutContext(
+        Math.min(innerMaxWidth, viewportWidth - left - right), style, parentLayoutContext, 
+        left, top);
 
     // line break positions determined when laying out TextFragmentWidget
     // are carried over from one TextFragmentWidget to another.
@@ -517,7 +518,7 @@ public class BlockWidget extends Widget {
           // anything else unaffected (in particular the layout context).
           addChild(block);
 
-          block.doLayout(innerMaxWidth, null, true);
+          block.doLayout(innerMaxWidth, viewportWidth, null, true);
           int left1 = marginLeft + borderLeft;
           int right1 = marginRight + borderRight;
           int top1 = marginTop + borderTop;
@@ -547,7 +548,7 @@ public class BlockWidget extends Widget {
           // y-position remains unchanged (advance() is not called)
 
           addChild(block);
-          block.doLayout(innerMaxWidth, null, true);
+          block.doLayout(innerMaxWidth, viewportWidth, null, true);
           layoutContext.placeBox(block.boxWidth, block.boxHeight, 
               floating, childStyle.getEnum(Style.CLEAR));
           block.setX(left + layoutContext.getBoxX() - block.boxX);
@@ -601,7 +602,7 @@ public class BlockWidget extends Widget {
           }
 
           int saveY = layoutContext.getCurrentY();
-          block.doLayout(innerMaxWidth, layoutContext, false);
+          block.doLayout(innerMaxWidth, viewportWidth, layoutContext, false);
           block.setX(left - block.boxX);
           block.setY(top + saveY - block.boxY);
           lineStartIndex = childInsertionIndex;
@@ -611,7 +612,7 @@ public class BlockWidget extends Widget {
           // similar to text fragments.
           addChild(childInsertionIndex, block);
           previousBlock = null;
-          block.doLayout(innerMaxWidth, null, childDisplay != Style.TABLE);
+          block.doLayout(innerMaxWidth, viewportWidth, null, childDisplay != Style.TABLE);
           int avail = layoutContext.getHorizontalSpace(block.boxHeight);
           if (avail >= block.boxWidth) {
             layoutContext.placeBox(
@@ -722,8 +723,8 @@ public class BlockWidget extends Widget {
 
     System.out.println();
     System.out.println("Width: " + getWidth() + 
-        " min: " + getMinimumWidth(containingWidth) + 
-        " max: " + getMaximumWidth(containingWidth) + 
+  //      " min: " + getMinimumWidth(containingWidth) + 
+  //      " max: " + getMaximumWidth(containingWidth) + 
         " spec: " + getSpecifiedWidth(containingWidth) +
         " x: " + getX() + " y: " + getY() + 
         " marginLeft: " + marginLeft + " marginRight: " + marginRight);
@@ -790,9 +791,9 @@ public class BlockWidget extends Widget {
    * 
    * @param containerWidth the width of the container
    */
-  public int getMinimumWidth(int containerWidth) {
+  public int getMinimumWidth(final int containerWidth, final int viewportWidth) {
     if (!widthValid) {
-      calculateWidth(containerWidth);
+      calculateWidth(containerWidth, viewportWidth);
     }
     return minimumWidth;
   }
@@ -802,9 +803,9 @@ public class BlockWidget extends Widget {
    * 
    * @param containerWidth the width of the container
    */
-  public int getMaximumWidth(int containerWidth) {
+  public int getMaximumWidth(final int containerWidth, final int viewportWidth) {
     if (!widthValid) {
-      calculateWidth(containerWidth);
+      calculateWidth(containerWidth, viewportWidth);
     }
     return maximumWidth;    
   }
@@ -830,7 +831,7 @@ public class BlockWidget extends Widget {
    * 
    * @param containerWidth Width of the container.
    */
-  protected void calculateWidth(int containerWidth) {
+  protected void calculateWidth(int containerWidth, int viewportWidth) {
     Style style = element.getComputedStyle();
     int border = style.getPx(Style.BORDER_LEFT_WIDTH) + 
     style.getPx(Style.BORDER_RIGHT_WIDTH) + 
@@ -892,16 +893,15 @@ public class BlockWidget extends Widget {
 
           int childDisplay = childStyle.getEnum(Style.DISPLAY);
           if (childStyle.getEnum(Style.FLOAT) == Style.NONE && 
-              (childDisplay == Style.BLOCK || 
-                  childDisplay == Style.LIST_ITEM)) {
+              (childDisplay == Style.BLOCK || childDisplay == Style.LIST_ITEM)) {
             maxW = Math.max(maxW, currentLineWidth);
-            maxW = Math.max(maxW, block.getMaximumWidth(childContainerWidth));
+            maxW = Math.max(maxW, block.getMaximumWidth(childContainerWidth, viewportWidth));
             currentLineWidth = 0;
           } else {
-            currentLineWidth += block.getMaximumWidth(childContainerWidth);
+            currentLineWidth += block.getMaximumWidth(childContainerWidth, viewportWidth);
           }
 
-          minW = Math.max(minW, block.getMinimumWidth(childContainerWidth));
+          minW = Math.max(minW, block.getMinimumWidth(childContainerWidth, viewportWidth));
         } 
       }
     }    
