@@ -1102,10 +1102,10 @@ public class Style {
   /**
    * Dumps this style sheet to stdout for debugging purposes.
    */
-  public void dump() {
+  public void dump(String indent) {
     for (int id = 0; id < PROPERTY_COUNT; id++) {
       if (isSet(id)) {
-        System.out.print("" + ID_TO_NAME_MAP.get(new Integer(id)) + ": ");
+        System.out.print(indent + ID_TO_NAME_MAP.get(new Integer(id)) + ": ");
         int v = values[id];
 
         byte unit = units[id];
@@ -1134,10 +1134,10 @@ public class Style {
               System.out.print(UNIT_NAMES[unit]);
             }
         }
-        System.out.print("; ");
+        System.out.println("; ");
       }
     }
-    System.out.print("/* " + specificity + " */");
+    System.out.println("/* specifity: " + specificity + " */");
   }
 
   /**

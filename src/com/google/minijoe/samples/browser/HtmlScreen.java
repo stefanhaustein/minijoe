@@ -70,6 +70,8 @@ public class HtmlScreen extends Canvas implements Window {
     if (browser.screenStack.size() != 0) {
     	rskWidget.setText("Back");
     	rskWidget.setAlign(Graphics.RIGHT);
+    } else {
+    	rskWidget.setText("");
     }
     
     root.addChild(lskWidget);

@@ -19,6 +19,8 @@ import java.util.Vector;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Graphics;
 
+import com.google.minijoe.html.HtmlWidget;
+
 public class Widget {
   public static final int KEY_PRESSED = 0;
   public static final int KEY_REPEATED = 1;
@@ -37,6 +39,11 @@ public class Widget {
   public static final int KEYCODE_RSK = -7;
   public static final int KEYCODE_CLEAR = -8;
 
+  public static final boolean DEBUG = false;
+  
+  /** The widget that has the "debug focus" if debug is enabled. */
+  public static Widget debug;
+  
   int x;
   int y;
   int w;
@@ -122,6 +129,13 @@ public class Widget {
    * the point. If no corresponding child is found, call handlePointerEvent();
    */
   public Widget dispatchPointerEvent(int type, int x, int y) {
+	if (DEBUG && type == POINTER_PRESSED && Widget.debug != null && Widget.debug.parent == this) {
+	  Widget.debug = this;
+	  handleDebug();
+      invalidate(false);
+      return this;
+    }
+	  
     for (int i = getChildCount() - 1; i >= 0; i--) {
       Widget c = getChild(i);
       int cx = c.getX();
@@ -132,6 +146,15 @@ public class Widget {
           return c;
         }
       }
+    }
+    
+    if (DEBUG) {
+      if (type == POINTER_PRESSED) {
+        Widget.debug = this;
+        handleDebug();
+        invalidate(false);
+      }
+      return this;
     }
     return handlePointerEvent(type, x, y) ? this : null;
   }
@@ -242,6 +265,9 @@ public class Widget {
       coords[0] += x;
       coords[1] += y;
     }
+  }
+  
+  protected void handleDebug() {
   }
   
   /**

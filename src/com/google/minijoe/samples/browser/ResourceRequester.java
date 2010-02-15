@@ -61,9 +61,6 @@ public class ResourceRequester implements Runnable {
 
   public void run() {
     HtmlBrowser browser = screen.browser;
-    if (browser.screenStack.indexOf(screen) == -1) {
-      return;
-    }
     
     try {
       boolean post = method == SystemRequestHandler.METHOD_POST;
@@ -156,11 +153,13 @@ public class ResourceRequester implements Runnable {
         }
 
         int responseCode = httpCon.getResponseCode();
-
+        
         if (responseCode >= 300 && responseCode <= 310) {
           String location = httpCon.getHeaderField("Location");
           if (location != null) {
-            browser.requestResource(null, SystemRequestHandler.METHOD_GET, location, 
+            System.out.println("Redirecting to: " + location);
+        	screen.htmlWidget.setUrl(location);
+            browser.requestResource(screen.htmlWidget, SystemRequestHandler.METHOD_GET, location, 
                 type, null);
           }
         }

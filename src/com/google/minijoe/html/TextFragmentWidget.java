@@ -398,10 +398,11 @@ public class TextFragmentWidget extends Widget {
   /**
    * Dumps members for debugging.
    */
-  public void printDebugInfo() {
+  public void handleDebug() {
+    System.out.print("Element Path: ");
     element.dumpPath();
-    System.out.print("Style: ");
-    element.getComputedStyle().dump();
+    System.out.print("Computed Style: ");
+    element.dumpStyle();
     
     System.out.println();
     System.out.println("x: " + getX() + " y: " + getY() + 

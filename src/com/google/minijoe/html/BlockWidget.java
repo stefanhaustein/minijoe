@@ -134,7 +134,8 @@ public class BlockWidget extends Widget {
   public BlockWidget(Element element, boolean[] flags) {
     this(element, flags[FLAG_UNASSIGNED_TRAVERSAL]);
     flags[0] = false;
-    if (element.getName().equals("img")) {
+    String name = element.getName();
+    if (name.equals("img")) {
       String src = element.getAttributeValue("src");
       if (src != null) {
         Object img = element.htmlWidget.getResource(src, 
@@ -399,7 +400,7 @@ public class BlockWidget extends Widget {
     if (shrinkWrap) {
       outerMaxWidth = style.lengthIsFixed(Style.WIDTH, true)
       ? style.getPx(Style.WIDTH, outerMaxWidth) + left + right
-          : Math.min(outerMaxWidth, getMaximumWidth(containingWidth, viewportWidth));
+          : Math.min(outerMaxWidth, getMaximumWidth(containingWidth));
       // Otherwise, if this is not a table cell and the width is fixed, we need 
       // to calculate the value for auto margins here (This is typically used 
       // to center the contents).
@@ -716,18 +717,21 @@ public class BlockWidget extends Widget {
   /**
    * Dump the internal state of this object for debugging purposes.
    */
-  public void printDebugInfo() {
-    element.dumpPath();
-    System.out.print("Style: ");
-    element.getComputedStyle().dump();
+  public void handleDebug() {
+    if (DEBUG) {
+	  System.out.println("Element path:");
+      element.dumpPath();
+      System.out.println("Computed Style: ");
+      element.dumpStyle();
 
-    System.out.println();
-    System.out.println("Width: " + getWidth() + 
-  //      " min: " + getMinimumWidth(containingWidth) + 
-  //      " max: " + getMaximumWidth(containingWidth) + 
+      System.out.println();
+      System.out.println("Width: " + getWidth() + 
+        " min: " + getMinimumWidth(containingWidth) + 
+        " max: " + getMaximumWidth(containingWidth) + 
         " spec: " + getSpecifiedWidth(containingWidth) +
         " x: " + getX() + " y: " + getY() + 
         " marginLeft: " + marginLeft + " marginRight: " + marginRight);
+    }
   }
 
   /**
@@ -791,9 +795,9 @@ public class BlockWidget extends Widget {
    * 
    * @param containerWidth the width of the container
    */
-  public int getMinimumWidth(final int containerWidth, final int viewportWidth) {
+  public int getMinimumWidth(final int containerWidth) {
     if (!widthValid) {
-      calculateWidth(containerWidth, viewportWidth);
+      calculateWidth(containerWidth);
     }
     return minimumWidth;
   }
@@ -803,9 +807,9 @@ public class BlockWidget extends Widget {
    * 
    * @param containerWidth the width of the container
    */
-  public int getMaximumWidth(final int containerWidth, final int viewportWidth) {
+  public int getMaximumWidth(final int containerWidth) {
     if (!widthValid) {
-      calculateWidth(containerWidth, viewportWidth);
+      calculateWidth(containerWidth);
     }
     return maximumWidth;    
   }
@@ -823,7 +827,8 @@ public class BlockWidget extends Widget {
     style.getPx(Style.MARGIN_LEFT) +  style.getPx(Style.MARGIN_RIGHT) + 
     style.getPx(Style.PADDING_LEFT) + style.getPx(Style.PADDING_RIGHT);
   }
-
+  
+  
   /**
    * Calculates the minimum and maximum widths of a block and stores them
    * in minimumWidth and maximumWidth. Do not call this method or use
@@ -831,7 +836,7 @@ public class BlockWidget extends Widget {
    * 
    * @param containerWidth Width of the container.
    */
-  protected void calculateWidth(int containerWidth, int viewportWidth) {
+  protected void calculateWidth(int containerWidth) {
     Style style = element.getComputedStyle();
     int border = style.getPx(Style.BORDER_LEFT_WIDTH) + 
     style.getPx(Style.BORDER_RIGHT_WIDTH) + 
@@ -895,13 +900,13 @@ public class BlockWidget extends Widget {
           if (childStyle.getEnum(Style.FLOAT) == Style.NONE && 
               (childDisplay == Style.BLOCK || childDisplay == Style.LIST_ITEM)) {
             maxW = Math.max(maxW, currentLineWidth);
-            maxW = Math.max(maxW, block.getMaximumWidth(childContainerWidth, viewportWidth));
+            maxW = Math.max(maxW, block.getMaximumWidth(childContainerWidth));
             currentLineWidth = 0;
           } else {
-            currentLineWidth += block.getMaximumWidth(childContainerWidth, viewportWidth);
+            currentLineWidth += block.getMaximumWidth(childContainerWidth);
           }
 
-          minW = Math.max(minW, block.getMinimumWidth(childContainerWidth, viewportWidth));
+          minW = Math.max(minW, block.getMinimumWidth(childContainerWidth));
         } 
       }
     }    
@@ -1124,7 +1129,7 @@ public class BlockWidget extends Widget {
     }
     invalidate(false);
   }
-
+  
   /**
    * Returns the element owning this Widget.
    */

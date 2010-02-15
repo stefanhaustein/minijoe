@@ -723,34 +723,9 @@ public class Element {
    * 
    * @param indent initial indentiation
    */
-  public void dump(String indent) {
-    System.out.print(indent + "<" + name);
-
-    if (attributes != null) {
-      for (Enumeration e = attributes.keys(); e.hasMoreElements();) {
-        Object key = e.nextElement();
-        System.out.print(" " + key + "='" + attributes.get(key) + "'");
-      }
-    }
-
+  public void dumpStyle() {
     if (getComputedStyle() != null) {
-      System.out.print(" style=\"");
-      getComputedStyle().dump();
-      System.out.print("\"");
-    }
-
-    if (getChildCount() == 0) {
-      System.out.println(" />");
-    } else {
-      System.out.println(">");
-      for (int i = 0; i < getChildCount(); i++) {
-        if (getChildType(i) == ELEMENT) {
-          getElement(i).dump(indent + "  ");
-        } else {
-          System.out.println(indent + "  '" + getText(i) + "'");
-        }
-      }
-      System.out.println(indent + "</" + name + ">");
+      getComputedStyle().dump("  ");
     }
   }
 
@@ -767,12 +742,7 @@ public class Element {
         System.out.print(" " + key + "='" + attributes.get(key) + "'");
       }
     }
-    System.out.print("> ");
-    Style style = getComputedStyle();
-    if (style != null) {
-      style.dump();
-    }
-    System.out.println();
+    System.out.println("> ");
     return indent + "  ";
   }
 

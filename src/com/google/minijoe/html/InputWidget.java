@@ -23,6 +23,7 @@ import java.util.*;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Font;
 import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Image;
 import javax.microedition.lcdui.TextField;
 
 /**
@@ -71,6 +72,16 @@ public class InputWidget extends BlockWidget {
         if (text == null) {
           text = "Reset";
         }
+      } else if ("image".equals(typeName)) {
+        type = Skin.INPUT_TYPE_IMAGE;
+        String src = element.getAttributeValue("src");
+        if (src != null) {
+          Object img = element.htmlWidget.getResource(src, 
+              SystemRequestHandler.TYPE_IMAGE, this);
+          if (img instanceof Image) {
+            image = (Image) img;
+          }
+        }
       } else {
         type = Skin.INPUT_TYPE_TEXT;
       }
@@ -81,9 +92,9 @@ public class InputWidget extends BlockWidget {
   }
 
 
-  protected void calculateWidth(int containerWidth, int viewportWidth) {
-    if (type == Skin.INPUT_TYPE_BUTTON) {
-      super.calculateWidth(containerWidth, viewportWidth);
+  protected void calculateWidth(int containerWidth) {
+    if (type == Skin.INPUT_TYPE_BUTTON || type == Skin.INPUT_TYPE_IMAGE) {
+      super.calculateWidth(containerWidth);
       return;
     }
 
@@ -153,7 +164,7 @@ public class InputWidget extends BlockWidget {
       return;
     }
 
-    if (type == Skin.INPUT_TYPE_BUTTON) {
+    if (type == Skin.INPUT_TYPE_BUTTON || type == Skin.INPUT_TYPE_IMAGE) {
       super.doLayout(outerMaxWidth, viewportWidth, border, shrinkWrap);
       return;
     }
@@ -165,7 +176,7 @@ public class InputWidget extends BlockWidget {
     int fh = style.getFont().getHeight();
 
     boxWidth = Math.min(outerMaxWidth, style.lengthIsFixed(Style.WIDTH, true) 
-        ? getSpecifiedWidth(outerMaxWidth) : getMinimumWidth(outerMaxWidth, viewportWidth));
+        ? getSpecifiedWidth(outerMaxWidth) : getMinimumWidth(outerMaxWidth));
 
     switch(type) {
       case Skin.INPUT_TYPE_TEXTAREA:
@@ -226,6 +237,10 @@ public class InputWidget extends BlockWidget {
    * Draw this input element.
    */
   public void drawContent(Graphics g, int dx, int dy) {
+	if (type == Skin.INPUT_TYPE_BUTTON || type == Skin.INPUT_TYPE_IMAGE) {
+      super.drawContent(g, dx, dy);
+      return;
+	}
 
     Style style = element.getComputedStyle();
 

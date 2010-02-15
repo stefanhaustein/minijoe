@@ -797,7 +797,7 @@ public class StyleSheet {
       System.out.print((current.length() == 0 ? "*" : current) + finished);
       System.out.print(" {");
       for (int i = 0; i < properties.size(); i++) {
-        ((Style) properties.elementAt(i)).dump();
+        ((Style) properties.elementAt(i)).dump("");
       }
       System.out.println("}");
     }

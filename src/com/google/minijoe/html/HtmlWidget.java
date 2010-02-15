@@ -16,7 +16,6 @@ package com.google.minijoe.html;
 
 import com.google.minijoe.common.Util;
 import com.google.minijoe.html.css.StyleSheet;
-import com.google.minijoe.html.uibase.ScrollWidget;
 import com.google.minijoe.html.uibase.Widget;
 
 import java.io.*;
@@ -43,15 +42,13 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public class HtmlWidget extends BlockWidget  {
 
-  public static final boolean DEBUG = false;
-
   /**
    * If set to false, the whole document is laid out again, even if only a 
    * partial layout seems necessary, for instance after an image has been 
    * loaded. Disable this flag for debugging only (too see if the optimization
    * is incorrect and causes an error).
    */
-  public static final boolean OPTIMIZE = DEBUG;
+  public static final boolean OPTIMIZE = !DEBUG;
 
 
   /** 
@@ -118,9 +115,6 @@ public class HtmlWidget extends BlockWidget  {
   /** Enable desktop rendering for CSS debugging purposes. */
   private boolean desktopRendering;
 
-  /** The widget that has the "debug focus" if debug is enabled. */
-  public static Widget debug;
-
   /**
    * returns true if the media string is null or contains "all" or "screen"; 
    * "handheld" is accepted, too, if not in desktop rendering mode.
@@ -152,6 +146,10 @@ public class HtmlWidget extends BlockWidget  {
     }
   }
 
+  public void setUrl(String url) {
+    documentUrl = baseURL = url;
+  }
+  
   public void doLayout(int viewportWidth) {
     if (element == null) {
       return;
@@ -161,7 +159,7 @@ public class HtmlWidget extends BlockWidget  {
       layoutValid = false;
       
       if (desktopRendering) {
-        int minWidth = getMinimumWidth(HIGH_VIEWPORT_WIDTH, HIGH_VIEWPORT_WIDTH);
+        int minWidth = getMinimumWidth(HIGH_VIEWPORT_WIDTH);
         if (minWidth > viewportWidth) {
           viewportWidth = minWidth > MEDIUM_VIEWPORT_WIDTH ? 
             HIGH_VIEWPORT_WIDTH : MEDIUM_VIEWPORT_WIDTH;
@@ -169,7 +167,7 @@ public class HtmlWidget extends BlockWidget  {
         setWidth(viewportWidth);
         doLayout(viewportWidth, viewportWidth, null, false);
       } else {
-        int minW = getMinimumWidth(viewportWidth, viewportWidth);
+        int minW = getMinimumWidth(viewportWidth);
         int w = Math.max(minW, viewportWidth);
         setWidth(w);
         // TODO(haustein) We may need to make the viewport width available to calculations...
@@ -210,7 +208,7 @@ public class HtmlWidget extends BlockWidget  {
       if (htmlElement == null) {
         htmlElement = new Element(this, "html");
       }
-
+      
       element = htmlElement.getElement("body");
       if (element == null) {
         element = new Element(this, "body");

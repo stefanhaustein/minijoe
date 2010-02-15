@@ -39,6 +39,7 @@ public class Skin {
   public static final int INPUT_TYPE_CHECKBOX = 7;
   public static final int INPUT_TYPE_OPTION = 8;
   public static final int INPUT_TYPE_TEXTAREA = 9;
+  public static final int INPUT_TYPE_IMAGE = 10;
 
   public static final int COLOR_WHITE = 0xffffffff;
   public static final int COLOR_MEDIUM_GRAY = 0x0ff888888;

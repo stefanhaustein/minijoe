@@ -62,9 +62,9 @@ public class TableWidget extends BlockWidget {
   /**
    * {@inheritDoc}
    */
-  protected void calculateWidth(int parentWidth, int viewportWidth) {
+  protected void calculateWidth(int parentWidth) {
     widthValid = true;
-    formatTable(parentWidth, viewportWidth, false, true);
+    formatTable(parentWidth, parentWidth, false, true);
   }
   
   /**
@@ -123,7 +123,7 @@ public class TableWidget extends BlockWidget {
     int minInnerWidth = 0;
 
     if (shrinkWrap) {
-      maxInnerWidth = getMaximumWidth(containerWidth, viewportWidth);
+      maxInnerWidth = getMaximumWidth(containerWidth);
     } else if (style.lengthIsFixed(Style.WIDTH, true)){
       maxInnerWidth = style.getPx(Style.WIDTH, containerWidth);
       minInnerWidth = maxInnerWidth;
@@ -200,11 +200,11 @@ public class TableWidget extends BlockWidget {
         BlockWidget cell = (BlockWidget) children.elementAt(rowCount + i);
         column = cols[i];
         minWidths[column] = Math.max(minWidths[column], 
-            cell.getMinimumWidth(maxInnerWidth, viewportWidth));
+            cell.getMinimumWidth(maxInnerWidth));
         specWidths[column] = Math.max(specWidths[column], 
             cell.getSpecifiedWidth(maxInnerWidth));
         maxWidths[column] = Math.max(maxWidths[column], 
-            cell.getMaximumWidth(maxInnerWidth, viewportWidth));
+            cell.getMaximumWidth(maxInnerWidth));
         Style cellStyle = cell.getElement().getComputedStyle();
         isFixed[column] |= cellStyle.lengthIsFixed(Style.WIDTH, false);
        // ||(cellStyle.lengthIsFixed(Style.WIDTH, true) && specWidths[column] 
@@ -232,9 +232,9 @@ public class TableWidget extends BlockWidget {
           div = span;
         }
         min = Math.max(
-            (cell.getMinimumWidth(maxInnerWidth, viewportWidth) - min + div - 1) / div, 0);
+            (cell.getMinimumWidth(maxInnerWidth) - min + div - 1) / div, 0);
         max = Math.max(
-            (cell.getMaximumWidth(maxInnerWidth, viewportWidth) - max + div - 1) / div, 0);
+            (cell.getMaximumWidth(maxInnerWidth) - max + div - 1) / div, 0);
         
         for (int j = 0; j < span; j++) {
           if (div == span || !isFixed[column + j]) {

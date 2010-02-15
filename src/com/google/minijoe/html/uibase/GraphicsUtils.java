@@ -326,6 +326,22 @@ public class GraphicsUtils {
     return result;
   }
 
+  public static void fillRectAlpha(Graphics g, int x, int y, int w, int h, int argb) {
+    int[] data = new int[Math.max(w, h)];
+    for (int i = 0; i < data.length; i++) {
+      data[i] = argb;
+    }
+    if (w >= h) {
+      for(int i = 0; i < h; i++) {
+        g.drawRGB(data, 0, w, x, y + i, w, 1, true);
+      }
+    } else {
+      for(int i = 0; i < w; i++) {
+        g.drawRGB(data, 0, 1, x + i, y, 1, h, true);
+      }	
+    }
+  }
+  
   public static int findBreakPosition(String text, int pos, Font font, int maxWidth) {
     char currentChar = text.charAt(pos);
     int nextCharIndex = pos + 1;
