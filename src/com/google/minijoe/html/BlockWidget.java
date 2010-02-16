@@ -1050,7 +1050,7 @@ public class BlockWidget extends Widget {
       }
     }
     if (image != null) {
-      g.drawImage(image, x0, y0, Graphics.TOP | Graphics.LEFT);
+      g.drawImage(image, x0 + 1 + style.getPx(Style.PADDING_LEFT, containingWidth), y0 + 1 + style.getPx(Style.PADDING_TOP, containingWidth), Graphics.TOP | Graphics.LEFT);
     }
   }
 
@@ -1075,48 +1075,58 @@ public class BlockWidget extends Widget {
    */
   protected void drawFocusRect(Graphics g, int dx, int dy) {
     // TODO(haustein) Replace with pseudo-class :focus handling
+	
     if (isFocused() && focusable) {
-      Skin.get().drawFocusRect(g, dx, dy, getWidth(), getHeight(), false);
+      Skin.get().drawFocusRect(g, dx + boxX, dy + boxY, boxWidth, boxHeight, false);
     }
 
-    if (HtmlWidget.debug == this) {
-      g.setColor(0x08888ff);
-      g.drawRect(dx, dy, getWidth() - 1, getHeight() - 1);
+    if (DEBUG && HtmlWidget.debug == this) {
+      int x0 = dx + boxX;
+      int y0 = dy + boxY;
+      int x1 = dx + boxWidth - 1;
+      int y1 = dy + boxHeight - 1;
+
+      if (boxX != 0 || boxY != 0 || boxWidth != getWidth() || boxHeight != getHeight()) {
+        g.setColor(0x0ff0000);
+        g.drawRect(dx, dy, getWidth(), getHeight());
+      }
+      
       Style style = element.getComputedStyle();
-
-      int x0 = dx;
-      int y0 = dy;
-      int x1 = dx + getWidth() - 1;
-      int y1 = dy + getHeight() - 1;
-
       for (int i = 0; i < 3; i++) {
-        int id = 0;
-
-        // Using switch here somehow confuses proguard 3.8 and we'll get
-        // VERIFIER ERROR - Accessing value from uninitialized register xxx
-        if (i == 0) {
-          g.setColor(0x8888ff);
+        int id;
+        int color;
+        // Colors: Yellow: margin; Purple: padding; light blue: block-level element.
+        switch (i) {
+        case 0:
+          color = 0x88ffff00;
           id = Style.MARGIN_TOP;
-        } else if (i == 1) {
-          g.setColor(0xff0000);
+          break;
+        case 1:
+          color = 0x88ff0000;
           id = Style.BORDER_TOP_WIDTH;
-        } else if (i == 2) {
-          g.setColor(0x00ffff);
+          break;
+        default: 
+          color = 0x088ff00ff;
           id = Style.PADDING_TOP;
         }
 
-        if (i == 0) {
-          x0 += marginLeft;
-          x1 -= marginRight;
-        } else {
-          x0 += style.getPx(id + 3, containingWidth);
-          x1 -= style.getPx(id + 1, containingWidth);          
-        }
-        y1 -= style.getPx(id + 2, containingWidth);
-        y0 += style.getPx(id, containingWidth);
+        int top = style.getPx(id, containingWidth);
+        int right = i == 0 ? marginRight : style.getPx(id + 1, containingWidth);
+        int bottom = style.getPx(id + 2, containingWidth);
+        int left = i == 0 ? marginLeft : style.getPx(id + 3, containingWidth);
+        
+        GraphicsUtils.fillRectAlpha(g, x0, y0, x1 - x0 + 1, top, color);
+        GraphicsUtils.fillRectAlpha(g, x0, y1 - bottom, x1 - x0 + 1, bottom, color);
 
-        g.drawRect(x0, y0, x1 - x0, y1 - y0);
+        GraphicsUtils.fillRectAlpha(g, x0, y0 + top, left, y1 - y0 + 1 - top - bottom, color);
+        GraphicsUtils.fillRectAlpha(g, x1 - x0 + 1 - right, y0 + top, right, y1 - y0 + 1 - top - bottom, color);
+
+        y0 += top;
+        x0 += left;
+        y1 -= bottom;
+        x1 -= right;
       }
+      GraphicsUtils.fillRectAlpha(g, x0, y0, x1 - x0 + 1, y1 - y0 + 1, 0x440000ff);
     }
   }
 

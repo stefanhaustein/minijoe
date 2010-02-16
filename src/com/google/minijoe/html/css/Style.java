@@ -849,7 +849,8 @@ public class Style {
   /**
    * Returns the raw integer value for the given property value. For lengths,
    * please use getPx() to obtain a pixel integer value. Lengths are stored
-   * internally multiplied by 1000.
+   * internally multiplied by 1000. This method does all the default handling
+   * (that is not handled in the default style sheet).
    * 
    * @param id property id
    * @return raw propery value
@@ -888,6 +889,8 @@ public class Style {
         return DISC;
       case POSITION:
         return STATIC;
+      case BACKGROUND_REPEAT: 
+    	return REPEAT;
     }
     return 0;
   }

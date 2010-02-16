@@ -84,7 +84,7 @@ public class TableWidget extends BlockWidget {
   }
   
   /** 
-   * Calculates the table width or lay out the table.
+   * Calculates the table width or performs the table layout.
    * 
    * @param containerWidth inner width of the containing widget
    * @param shrinkWrap if true, use all space necessary 
@@ -250,6 +250,7 @@ public class TableWidget extends BlockWidget {
     int maxSum = 0;
     int specSum = 0;
     int actualWidth = 0;
+    int fixedCount = 0;
     
     for (int i = 0; i < colCount; i++) {
       minSum += minWidths[i];
@@ -257,6 +258,9 @@ public class TableWidget extends BlockWidget {
       specSum += specWidths[i];
       maxWidths[i] = isFixed[i] ? specWidths[i] : maxWidths[i];
       maxSum += maxWidths[i];
+      if (isFixed[i]) {
+        fixedCount++;
+      }
     }
 
     if (measureOnly) {
@@ -275,7 +279,7 @@ public class TableWidget extends BlockWidget {
     } 
     actualWidth = minSum;
     
-    // distribute space to cells having a percent width  that was not met yet.
+    // distribute space to cells having a percent width that was not met yet.
     if (maxInnerWidth > minSum && specSum > minSum) {
       int distribute = maxInnerWidth - minSum;
       for (int i = 0; i < colCount; i++) {
@@ -303,10 +307,15 @@ public class TableWidget extends BlockWidget {
     // if the table has a fixed width, force column widths wider if necessary.
     if (style.lengthIsFixed(Style.WIDTH, true) && maxSum > 0 && 
         maxInnerWidth > actualWidth) {
-      int add = (maxInnerWidth - actualWidth) / colCount;
+      if (fixedCount == colCount) {
+    	fixedCount = 0;
+      }
+      int add = (maxInnerWidth - actualWidth) / (colCount - fixedCount);
       for (int i = 0; i < colCount; i++) {
-        minWidths[i] += add;
-        actualWidth += add;
+        if (fixedCount == 0 || !isFixed[i]) {
+          minWidths[i] += add;
+          actualWidth += add;
+        }
       }
     }
     

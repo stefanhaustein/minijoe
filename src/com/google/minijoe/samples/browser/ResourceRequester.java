@@ -32,11 +32,12 @@ import javax.microedition.lcdui.Image;
  */
 public class ResourceRequester implements Runnable {
 
-  static final String USER_AGENT = 
-    "NokiaN70-1/2.0539.1.2 Series60/2.8 Profile/MIDP-2.0 Configuration/CLDC-1.1";
-//    "Mozilla/5.0 (SymbianOS/9.1; U; [en-us]) AppleWebKit/413 (KHTML, like Gecko) Safari/413";
-  //  "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11";
-  //  "My own browser";//"NokiaN70-1/5.0609.2.0";
+//  static final String USER_AGENT = 
+//	  
+//    "NokiaN70-1/2.0539.1.2 Series60/2.8 Profile/MIDP-2.0 Configuration/CLDC-1.1";
+////    "Mozilla/5.0 (SymbianOS/9.1; U; [en-us]) AppleWebKit/413 (KHTML, like Gecko) Safari/413";
+//  //  "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-GB; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11";
+//  //  "My own browser";//"NokiaN70-1/5.0609.2.0";
 
   static final String[] WAIT_MSGS = {
     "Growing XML tree", "Mixing Colors", "Styling Styles", "Counting Pages"
@@ -83,7 +84,8 @@ public class ResourceRequester implements Runnable {
         if (post) {
           httpCon.setRequestMethod("POST");
         }
-        httpCon.setRequestProperty("User-Agent", USER_AGENT);
+        httpCon.setRequestProperty("User-Agent", browser.userAgent);
+        httpCon.setRequestProperty("X-Screen-Width", ""+screen.getWidth());
         httpCon.setRequestProperty("Connection", "Keep-Alive");
         httpCon.setRequestProperty("Accept-Charset", "utf-8");
 
@@ -109,7 +111,10 @@ public class ResourceRequester implements Runnable {
 
           if ("content-type".equals(name)) {
             String value = httpCon.getHeaderField(headerIndex);
-            String val2 = httpCon.getHeaderField("Content-Type");
+            if (value.indexOf("vnd.sun.j2me.app-descriptor") != -1) {
+              browser.platformRequest(url);
+              return;
+            }
             int eq = value.indexOf ("harset="); 
             if (eq != -1) {
               encoding = value.substring(eq + 7).trim();
@@ -159,8 +164,9 @@ public class ResourceRequester implements Runnable {
           if (location != null) {
             System.out.println("Redirecting to: " + location);
         	screen.htmlWidget.setUrl(location);
-            browser.requestResource(screen.htmlWidget, SystemRequestHandler.METHOD_GET, location, 
-                type, null);
+            browser.requestResource(screen.htmlWidget, method, location, 
+                type, requestData);
+            return;
           }
         }
 

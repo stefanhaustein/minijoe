@@ -414,6 +414,10 @@ public class HtmlWidget extends BlockWidget  {
    * makes sure the layout and viewport width are updated if not valid.
    */
   public void drawTree(Graphics g, int dx, int dy, int cx, int cy, int cw, int ch) {
+	// Make sure the backgound covers the whole screen.
+    if (boxY + boxHeight < getHeight()) {
+      boxHeight = getHeight() - boxY;
+    }
     if (element != null && element.getComputedStyle() != null) {
       super.drawTree(g, dx, dy, cx, cy, cw, ch);
     }

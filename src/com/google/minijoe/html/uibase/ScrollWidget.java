@@ -315,6 +315,12 @@ public class ScrollWidget extends Widget {
       yMax = Math.max(yMax, w.getY() + w.getHeight());
     }
 
+    // If there is too much space, stretch the last item.
+    if (y < getHeight() && getChildCount() != 0) {
+      Widget c = getChild(getChildCount() - 1);
+      c.setHeight(c.getHeight() + (getHeight() - y));
+    }
+    
     if(focus == null || focus == this) {
       focusNext(-1, -1, FOCUS_NEXT_DOWN);
     }

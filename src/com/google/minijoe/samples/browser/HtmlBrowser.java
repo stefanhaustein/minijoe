@@ -23,6 +23,7 @@ import com.google.minijoe.html.HtmlWidget;
 import com.google.minijoe.html.InputWidget;
 import com.google.minijoe.html.SystemRequestHandler;
 
+import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Display;
@@ -68,17 +69,24 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
   private List list;
   private TextBox textBox;
   private List menu;
-
+  String userAgent;
+  
   public HtmlBrowser() {    
   }
 
   protected void startApp() throws MIDletStateChangeException {
 
     display = Display.getDisplay(this);
-
+    userAgent = "MiniJoe/0.5 (like Opera Mini/2.0)" + 
+    " Platform/" + getAppProperty("microedition.platform") + 
+	" Configuration/" + getAppProperty("microedition.configuration") +
+    " Profile/" + getAppProperty("microEdition.profile");
+    
+    
     StringBuffer menu = new StringBuffer("<html><head><title>Bookmarks</title></head><body><ul>");
     
     addLink(menu, "http://hsivonen.iki.fi/test/xhtml-suite/xhtml-basic.xhtml");
+    addLink(menu, "http://www.google.com/m");
     addLink(menu, "http://mobile.google.com");
     addLink(menu, "http://wwf.mobi/");
     addLink(menu, "http://www.bigbaer.com/css_tutorials/css.float.html.tutorial.htm");
@@ -120,6 +128,15 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
       String url, int expectedContentType, byte[] data) {
 
 	System.out.println("Request: " + url);  
+	if (!url.toLowerCase().startsWith("http")) {
+	  try {
+		platformRequest(url);
+      } catch (ConnectionNotFoundException e) {
+		e.printStackTrace();
+	  }
+	  return;
+	}
+	
 	  
     if (requestQueue.size() >= threadCount && threadCount < 4) {
       threadCount++;
