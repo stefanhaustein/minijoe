@@ -1028,9 +1028,12 @@ public class Style {
             case CssTokenizer.TT_URI:
               if (id == MULTIVALUE_BACKGROUND || "background-image".equals(name)) {
                 backgroundImage = new Image[1];
-                backgroundImage[0] = (Image) 
-                tokenizer.htmlWidget.getResource(tokenizer.sval, 
+                Image bg = (Image) tokenizer.htmlWidget.getResource(tokenizer.sval, 
                     SystemRequestHandler.TYPE_IMAGE, backgroundImage);
+                // null check necessary to avoid overwriting image inserted in a separate thread!
+                if (bg != null) {
+                  backgroundImage[0] = bg;
+                }
               }
               break;
 
@@ -1139,6 +1142,10 @@ public class Style {
         }
         System.out.println("; ");
       }
+    }
+    if (backgroundImage != null && backgroundImage[0] != null) {
+    	System.out.println(indent + "background-image: [w:" + backgroundImage[0].getWidth() + 
+    			" h:" + backgroundImage[0].getHeight() + "]");
     }
     System.out.println("/* specifity: " + specificity + " */");
   }
