@@ -462,7 +462,7 @@ public class BlockWidget extends Widget {
     // Keeps track of y-position and borders for the regular layout set by
     // floating elements. The viewport width is taken into account here.
     LayoutContext layoutContext = new LayoutContext(
-        Math.min(innerMaxWidth, viewportWidth - left - right), style, parentLayoutContext, 
+        Math.min(innerMaxWidth, viewportWidth), style, parentLayoutContext, 
         left, top);
 
     // line break positions determined when laying out TextFragmentWidget
