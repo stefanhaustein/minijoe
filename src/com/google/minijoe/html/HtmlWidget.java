@@ -115,6 +115,12 @@ public class HtmlWidget extends BlockWidget  {
   /** Enable desktop rendering for CSS debugging purposes. */
   private boolean desktopRendering;
 
+  /** 
+   * Table mapping element names to ElementHandler instances for custom element
+   * support.
+   */
+  Hashtable elementHandlers;
+
   /**
    * returns true if the media string is null or contains "all" or "screen"; 
    * "handheld" is accepted, too, if not in desktop rendering mode.
@@ -135,11 +141,12 @@ public class HtmlWidget extends BlockWidget  {
    * @param documentUrl document URL, used as base URL for resolving relative links
    * @param destopRendering enables desktop rendering for debugging purposes
    */
-  public HtmlWidget(SystemRequestHandler requestHandler, String documentUrl, 
+  public HtmlWidget(SystemRequestHandler requestHandler, String documentUrl, Hashtable elementHandlers,
       boolean desktopRendering) {
     super(null, false);
     this.requestHandler = requestHandler;
     this.desktopRendering = desktopRendering;
+    this.elementHandlers = elementHandlers;
 
     if (documentUrl != null) {
       this.documentUrl = title = baseURL = documentUrl;

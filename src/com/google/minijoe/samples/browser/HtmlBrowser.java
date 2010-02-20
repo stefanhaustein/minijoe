@@ -16,6 +16,7 @@ package com.google.minijoe.samples.browser;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import com.google.minijoe.common.Util;
@@ -354,5 +355,12 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
       currentScreen = (HtmlScreen) screenStack.elementAt(screenStack.size() - 2);
       display.setCurrent(currentScreen);
       screenStack.removeElementAt(screenStack.size() - 1);}
+  }
+
+  /** 
+   * Overwrite this in a subclass to support additional elements.
+   */
+  public Hashtable getElementHandlers() {
+	return null;
   }
 }

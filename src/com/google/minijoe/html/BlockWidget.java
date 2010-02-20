@@ -180,12 +180,26 @@ public class BlockWidget extends Widget {
     } else if (("select".equals(name) && !e.getAttributeBoolean("multiple")) || 
         "option".equals(name) || "textarea".equals(name) || "button".equals(name)) {
       children.addElement(new InputWidget(e));
-    } else if (style.isBlock(false)) {
-      children.addElement(new BlockWidget(e, flags));
     } else {
-      // Element does not get its own block widget, just add the element's 
-      // children to this block
-      addChildren(e, flags);
+      Object widget = ElementHandler.DEFAULT_HANDLING;
+      if (element.htmlWidget.elementHandlers != null) {
+    	ElementHandler handler = (ElementHandler) element.htmlWidget.elementHandlers.get(e.getName());
+    	if (handler != null) {
+    		widget = handler.handle(e, true);
+    	}
+      }
+      
+      if (widget == ElementHandler.DEFAULT_HANDLING) {
+        if (style.isBlock(false)) {
+          children.addElement(new BlockWidget(e, flags));
+        } else {
+          // Element does not get its own block widget, just add the element's 
+          // children to this block
+          addChildren(e, flags);
+        }
+      } else if (widget != ElementHandler.IGNORE_ELEMENT) {
+    	 children.addElement((BlockWidget) widget); 
+      }
     }
 
     String label = e.getAttributeValue("id");

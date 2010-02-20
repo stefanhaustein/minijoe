@@ -82,7 +82,7 @@ public class HtmlScreen extends Canvas implements Window {
     titleWidget.setTextColor(0xffffff);
     titleWidget.setText(url);
 
-    htmlWidget = new HtmlWidget(browser, url, false);
+    htmlWidget = new HtmlWidget(browser, url, browser.getElementHandlers(), false);
     
     scrollWidget.addChild(titleWidget);
     scrollWidget.addChild(htmlWidget);
