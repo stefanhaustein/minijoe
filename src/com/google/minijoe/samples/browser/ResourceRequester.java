@@ -70,6 +70,9 @@ public class ResourceRequester implements Runnable {
 
       int cut = url.indexOf('#');
 
+//      System.out.println("");
+//      System.out.println("Requesting: " + url);
+      
       StreamConnection con = (StreamConnection) Connector.open(
           cut == -1 ? url : url.substring(0, cut), 
               post ? Connector.READ_WRITE : Connector.READ);
@@ -83,6 +86,7 @@ public class ResourceRequester implements Runnable {
         HttpConnection httpCon = (HttpConnection) con;
         if (post) {
           httpCon.setRequestMethod("POST");
+          httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         }
         httpCon.setRequestProperty("User-Agent", browser.userAgent);
         httpCon.setRequestProperty("X-Screen-Width", ""+screen.getWidth());
@@ -91,6 +95,7 @@ public class ResourceRequester implements Runnable {
 
         String cookie = browser.getCookies(url);
         if (cookie != null) {
+//          System.out.println("Setting Cookie: " + cookie);
           httpCon.setRequestProperty("Cookie", cookie);
         }
 
@@ -98,8 +103,10 @@ public class ResourceRequester implements Runnable {
           OutputStream os = httpCon.openOutputStream();
           os.write(requestData);
           os.close();
+//          System.out.println("Postdata\n" + new String(requestData));
         }
 
+//        System.out.println("receiving:");
         contentLength = (int) httpCon.getLength();
         int headerIndex = 0;
         while (true){
@@ -108,7 +115,8 @@ public class ResourceRequester implements Runnable {
             break;
           }
           name = name.toLowerCase();
-
+//          System.out.println(name + ": " + httpCon.getHeaderField(headerIndex));
+          
           if ("content-type".equals(name)) {
             String value = httpCon.getHeaderField(headerIndex);
             if (value.indexOf("vnd.sun.j2me.app-descriptor") != -1) {
@@ -122,7 +130,7 @@ public class ResourceRequester implements Runnable {
           } else if ("set-cookie".equals(name)) {
             String cName = "";
             String cValue = "";
-            String cHost = "";
+            String cHost = httpCon.getHost();
             String cPath = "";
             String cExpires = null;
             String cSecure = null;
@@ -158,11 +166,11 @@ public class ResourceRequester implements Runnable {
         }
 
         int responseCode = httpCon.getResponseCode();
-        
+//        System.out.println("Response Code: " + httpCon.getResponseCode());
         if (responseCode >= 300 && responseCode <= 310) {
           String location = httpCon.getHeaderField("Location");
           if (location != null) {
-            System.out.println("Redirecting to: " + location);
+//            System.out.println("Redirecting to: " + location);
         	screen.htmlWidget.setUrl(location);
             browser.requestResource(screen.htmlWidget, method, location, 
                 type, requestData);

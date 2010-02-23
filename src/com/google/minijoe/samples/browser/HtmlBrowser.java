@@ -229,6 +229,7 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
       String exKey = exCookie[COOKIE_NAME];
 
       if (key.equals(exKey) && domain.equals(exDomain) && path.equals(exPath)) {
+    	// System.out.println("removing old cookie index " + i);
         cookies.removeElementAt(i);
       }
     }
@@ -249,6 +250,11 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
       }
     }
     cookie[COOKIE_EXPIRES] = "" + expiresMillis;
+    
+    //for (int i = 0; i < cookie.length; i++) {
+    //	System.out.println("setcookie[" + i +"]: " + cookie[i]);
+    //}
+    
     cookies.addElement(cookie);
   }
 

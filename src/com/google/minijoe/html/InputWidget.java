@@ -323,7 +323,7 @@ public class InputWidget extends BlockWidget {
           return true;
 
         case Skin.INPUT_TYPE_SUBMIT:
-          submit();
+          submit(element.getAttributeValue("value"));
           return true;
       }
     }
@@ -391,9 +391,7 @@ public class InputWidget extends BlockWidget {
     }
 
     if (value != null && key != null) {
-      if (sb.length() != 0) {
-        sb.append('&');
-      }
+      sb.append('&');
       sb.append(Util.encodeURL(key));
       sb.append('=');
       sb.append(Util.encodeURL(value));
@@ -409,9 +407,12 @@ public class InputWidget extends BlockWidget {
   /**
    * Submits a form. 
    */
-  private void submit() {
+  private void submit(String submitValue) {
     Element form = findForm();
-    StringBuffer buf = new StringBuffer("");
+    StringBuffer buf = new StringBuffer("submit=");
+    if (submitValue != null) {
+      buf.append(Util.encodeURL(submitValue));
+    }
     collectFormData(form, buf);
 
     String url = document.getAbsoluteUrl(form.getAttributeValue("action"));
