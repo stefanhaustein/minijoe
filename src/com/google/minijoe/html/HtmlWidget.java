@@ -335,7 +335,9 @@ public class HtmlWidget extends BlockWidget  {
     }
     synchronized (styleSheet) {
       styleOutdated = false;
-      element.apply(styleSheet, new Vector());
+      Vector applyAnywhere = new Vector();
+      applyAnywhere.addElement(styleSheet);
+      element.apply(new Vector(), applyAnywhere);
     }
     if (!OPTIMIZE || needsBuild) {
       synchronized (this) {

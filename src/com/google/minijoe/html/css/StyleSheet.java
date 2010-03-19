@@ -57,12 +57,12 @@ public class StyleSheet {
   private static final char SELECT_CLASS = 2;
   private static final char SELECT_PSEUDOCLASS = 3;
   private static final char SELECT_NAME = 4;
-  private static final char SELECT_ANCESTOR = 6;
+  private static final char SELECT_DESCENDANT = 6;
   private static final char SELECT_ATTRIBUTE_NAME = 7;
   private static final char SELECT_ATTRIBUTE_VALUE = 8;
   private static final char SELECT_ATTRIBUTE_INCLUDES = 9;
   private static final char SELECT_ATTRIBUTE_DASHMATCH = 10;
-  private static final char SELECT_PARENT = 11;
+  private static final char SELECT_CHILD = 11;
 
   /**
    * Specificity weight for element name and pseudoclass selectors.
@@ -117,14 +117,14 @@ public class StyleSheet {
   private Vector selectAttributeValue;
 
   /**
-   * Reference to parent selector selector sub-style sheet.
+   * Reference to child selector selector sub-style sheet.
    */
-  private StyleSheet selectParent;
+  private StyleSheet selectChild;
 
   /**
-   * Reference to ancestor selector sub-style sheet.
+   * Reference to descendant selector sub-style sheet.
    */
-  private StyleSheet selectAncestor;
+  private StyleSheet selectDescendants;
 
   /**
    * Properties for * rules 
@@ -409,37 +409,36 @@ public class StyleSheet {
    */
   private Style parseSelector(CssTokenizer ct) {
 
-    StringBuffer types = new StringBuffer();
-    Vector names = new Vector();
-    Vector values = new Vector();
-    int pos = 0;
     boolean error = false;
+    
+    int specificity = 0;
+    StyleSheet result = this;
 
     loop : while (true) {
-      char type;
-      String name = null;
-      String value = null;
-      boolean resetPos = false;
-
       switch (ct.ttype) {
-        case CssTokenizer.TT_IDENT:
-          type = SELECT_NAME;
-          name = ct.sval.toLowerCase();
+        case CssTokenizer.TT_IDENT: {
+          if (result.selectElementName == null) {
+            result.selectElementName = new Hashtable();
+          }
+          result = descend(result.selectElementName, ct.sval.toLowerCase());
+          specificity += SPECIFICITY_D;
+          ct.nextToken(true);
           break;
-
-        case '*':
+        }
+        case '*': {
           // no need to do anything...
           ct.nextToken(true);
           continue;
-
-        case '[':
+        }
+        case '[': {
           ct.nextToken(false);
-          name = ct.sval.toLowerCase();
+          String name = ct.sval.toLowerCase();
           ct.nextToken(false);
-
+          char type;
+          String value = null;
+          
           if (ct.ttype == ']') {
             type = SELECT_ATTRIBUTE_NAME;
-            value = null;
           } else {
             switch (ct.ttype) {
               case CssTokenizer.TT_INCLUDES:
@@ -463,28 +462,35 @@ public class StyleSheet {
             value = ct.sval;
             ct.nextToken(false);
             ct.assertTokenType(']');
+            specificity += SPECIFICITY_C;
           }
+          result = result.createAttributeSelector(type, name, value);
+          ct.nextToken(true);
           break;
-
+        }
         case '.':
-          type = SELECT_CLASS;
-          name = "class";
           ct.nextToken(false);
           error = ct.ttype != CssTokenizer.TT_IDENT;
-          value = ct.sval;
+          result = result.createAttributeSelector(SELECT_ATTRIBUTE_INCLUDES, "class", ct.sval);
+          specificity += SPECIFICITY_C;
+          ct.nextToken(true);
           break;
 
         case CssTokenizer.TT_HASH:
-          type = SELECT_ID;
-          name = "id";
-          value = ct.sval;
+          result = result.createAttributeSelector(SELECT_ATTRIBUTE_VALUE, "id", ct.sval);
+          specificity += SPECIFICITY_B;
+          ct.nextToken(true);
           break;
 
-        case ':':
-          type = SELECT_PSEUDOCLASS;
+        case ':': 
           ct.nextToken(false);
           error = ct.ttype != CssTokenizer.TT_IDENT;
-          name = ct.sval;
+          if (result.selectPseudoclass == null) {
+            result.selectPseudoclass = new Hashtable();
+          }
+          result = descend(result.selectPseudoclass, ct.sval);
+          specificity += SPECIFICITY_C;
+          ct.nextToken(true);
           break;
 
         case CssTokenizer.TT_S:
@@ -492,36 +498,30 @@ public class StyleSheet {
           if (ct.ttype == '{' || ct.ttype == ',' || ct.ttype == -1) {
             break loop;
           }
-          resetPos = true;
           if (ct.ttype == '>') {
-            type = SELECT_PARENT;
+            if (result.selectChild == null) {
+              result.selectChild = new StyleSheet(false);
+            }
+            result = result.selectChild;
             ct.nextToken(false);
           } else {
-            type = SELECT_ANCESTOR;
+            if (result.selectDescendants == null) {
+              result.selectDescendants = new StyleSheet(false);
+            }
+            result = result.selectDescendants;
           }
           break;
 
         case '>':
-          resetPos = true;
-          type = SELECT_PARENT;
+          if (result.selectChild == null) {
+            result.selectChild = new StyleSheet(false);
+          }
+          result = result.selectChild;
           ct.nextToken(false);
           break;
 
         default: // unknown
           break loop;
-      }
-
-      if (resetPos) {
-        pos = 0;
-        types.insert(0, type);
-        names.insertElementAt(name, 0);
-        values.insertElementAt(value, 0);
-      } else {
-        types.insert(pos, type);
-        names.insertElementAt(name, pos);
-        values.insertElementAt(value, pos);
-        pos++;
-        ct.nextToken(true);
       }
     }
 
@@ -536,90 +536,6 @@ public class StyleSheet {
       return null;
     }
 
-    // descend into the right position...
-    StyleSheet result = this;
-    int specificity = 0;
-
-    for (int i = 0; i < types.length(); i++) {
-      String name = (String) names.elementAt(i);
-      String value = (String) values.elementAt(i);
-
-      char type = types.charAt(i);
-      switch (type) {
-        case SELECT_NAME:
-          if (result.selectElementName == null) {
-            result.selectElementName = new Hashtable();
-          }
-          result = descend(result.selectElementName, name);
-          specificity += SPECIFICITY_D;
-          break;
-
-        case SELECT_PSEUDOCLASS:
-          if (result.selectPseudoclass == null) {
-            result.selectPseudoclass = new Hashtable();
-          }
-          result = descend(result.selectPseudoclass, name);
-          specificity += SPECIFICITY_D;
-          break;
-
-        case SELECT_PARENT:
-          if (result.selectParent == null) {
-            result.selectParent = new StyleSheet(false);
-          }
-          result = result.selectParent;
-          break;
-
-        case SELECT_ANCESTOR:
-          if (result.selectAncestor == null) {
-            result.selectAncestor = new StyleSheet(false);
-          }
-          result = result.selectAncestor;
-          break;
-
-        default:
-          // attribute selection....
-          long selectorSpecificity = SPECIFICITY_C;
-          if (type == SELECT_ID) {
-            type = SELECT_ATTRIBUTE_VALUE;
-            selectorSpecificity = SPECIFICITY_B;
-          } else if (type == SELECT_CLASS) {
-            type = SELECT_ATTRIBUTE_INCLUDES;
-          }
-          int index = -1;
-          if (result.selectAttributeOperation == null) {
-            result.selectAttributeOperation = new StringBuffer();
-            result.selectAttributeName = new Vector();
-            result.selectAttributeValue = new Vector();
-          } else {
-            for (int j = 0; j < result.selectAttributeOperation.length(); j++) {
-              if (result.selectAttributeOperation.charAt(j) == type
-                  && result.selectAttributeName.elementAt(j).equals(name)) {
-                index = j;
-              }
-            }
-          }
-
-          if (type == SELECT_ATTRIBUTE_NAME) {
-            if (index == -1) {
-              index = result.selectAttributeOperation.length();
-              result.selectAttributeOperation.append(type);
-              result.selectAttributeName.addElement(name);
-              result.selectAttributeValue.addElement(new StyleSheet(false));
-            }
-            result = (StyleSheet) result.selectAttributeValue.elementAt(index);
-          } else {
-            if (index == -1) {
-              index = result.selectAttributeOperation.length();
-              result.selectAttributeOperation.append(type);
-              result.selectAttributeName.addElement(name);
-              result.selectAttributeValue.addElement(new Hashtable());
-            }
-            result = descend((Hashtable) result.selectAttributeValue
-                .elementAt(index), value);
-            specificity += selectorSpecificity;
-          }
-      }
-    }
     Style style = new Style();
     style.specificity = specificity;
     if (result.properties == null) {
@@ -630,6 +546,48 @@ public class StyleSheet {
     return style;
   }
 
+  private StyleSheet createAttributeSelector(char type, String name, String value) {
+    long selectorSpecificity = SPECIFICITY_C;
+    if (type == SELECT_ID) {
+      type = SELECT_ATTRIBUTE_VALUE;
+      selectorSpecificity = SPECIFICITY_B;
+    } else if (type == SELECT_CLASS) {
+      type = SELECT_ATTRIBUTE_INCLUDES;
+    }
+    int index = -1;
+    if (selectAttributeOperation == null) {
+      selectAttributeOperation = new StringBuffer();
+      selectAttributeName = new Vector();
+      selectAttributeValue = new Vector();
+    } else {
+      for (int j = 0; j < selectAttributeOperation.length(); j++) {
+        if (selectAttributeOperation.charAt(j) == type
+            && selectAttributeName.elementAt(j).equals(name)) {
+          index = j;
+        }
+      }
+    }
+
+    if (type == SELECT_ATTRIBUTE_NAME) {
+      if (index == -1) {
+        index = selectAttributeOperation.length();
+        selectAttributeOperation.append(type);
+        selectAttributeName.addElement(name);
+        selectAttributeValue.addElement(new StyleSheet(false));
+      }
+      return (StyleSheet) selectAttributeValue.elementAt(index);
+    } 
+    
+    if (index == -1) {
+      index = selectAttributeOperation.length();
+      selectAttributeOperation.append(type);
+      selectAttributeName.addElement(name);
+      selectAttributeValue.addElement(new Hashtable());
+    }
+    return descend((Hashtable) selectAttributeValue.elementAt(index), value);
+  }
+  
+  
   /**
    * Returns the style sheet denoted by the given key from the hashtable. If not
    * yet existing, a corresponding entry is created with the given specificity.
@@ -655,13 +613,13 @@ public class StyleSheet {
    * @param queue queue of matching rules to be processed further
    */
   private void collectStyles(Element element, Hashtable map, String key,
-      Vector queue) {
+      Vector queue, Vector children, Vector descendants) {
     if (key == null || map == null) {
       return;
     }
     StyleSheet sh = (StyleSheet) map.get(key);
     if (sh != null) {
-      sh.collectStyles(element, queue);
+      sh.collectStyles(element, queue, children, descendants);
     }
   }
 
@@ -673,7 +631,7 @@ public class StyleSheet {
    * @param s the style to be modified
    * @param queue the queue
    */
-  public void collectStyles(Element element, Vector queue) {
+  public void collectStyles(Element element, Vector queue, Vector children, Vector descendants) {
     
     if (properties != null) {
       // enqueue the style at the current node according to its specificity
@@ -708,16 +666,16 @@ public class StyleSheet {
         }
         if (type == SELECT_ATTRIBUTE_NAME) {
           ((StyleSheet) selectAttributeValue.elementAt(i)).collectStyles(
-              element, queue);
+              element, queue, children, descendants);
         } else {
           Hashtable valueMap = (Hashtable) selectAttributeValue.elementAt(i);
           if (type == SELECT_ATTRIBUTE_VALUE) {
-            collectStyles(element, valueMap, value, queue);
+            collectStyles(element, valueMap, value, queue, children, descendants);
           } else {
             String[] values = Util.split(value,
                 type == SELECT_ATTRIBUTE_INCLUDES ? ' ' : ',');
             for (int j = 0; j < values.length; j++) {
-              collectStyles(element, valueMap, values[j], queue);
+              collectStyles(element, valueMap, values[j], queue, children, descendants);
             }
           }
         }
@@ -725,26 +683,19 @@ public class StyleSheet {
     }
 
     if (selectElementName != null) {
-      collectStyles(element, selectElementName, element.getName(), queue);
+      collectStyles(element, selectElementName, element.getName(), queue, children, descendants);
     }
 
-    if (selectParent != null) {
-      Element parent = element.getParent();
-      if (parent != null) {
-        selectParent.collectStyles(parent, queue);
-      }
+    if (selectChild != null) {
+      children.addElement(selectChild);
     }
 
     if (selectPseudoclass != null && element.isFocusable()) {
-      collectStyles(element, selectPseudoclass, "link", queue);
+      collectStyles(element, selectPseudoclass, "link", queue, children, descendants);
     }
     
-    if (selectAncestor != null) {
-      Element parent = element.getParent();
-      while (parent != null) {
-        selectAncestor.collectStyles(parent, queue);
-        parent = parent.getParent();
-      }
+    if (selectDescendants != null) {
+      descendants.addElement(selectDescendants);
     }
   }
 
@@ -789,12 +740,11 @@ public class StyleSheet {
    * Print the style sheet to stdout for debugging purposes.
    * 
    * @param current the current selector
-   * @param finished finished child selectors
    */
-  public void dump(String current, String finished) {
+  public void dump(String current) {
 
     if (properties != null) {
-      System.out.print((current.length() == 0 ? "*" : current) + finished);
+      System.out.print(current.length() == 0 ? "*" : current);
       System.out.print(" {");
       for (int i = 0; i < properties.size(); i++) {
         ((Style) properties.elementAt(i)).dump("");
@@ -805,7 +755,7 @@ public class StyleSheet {
     if (selectElementName != null) {
       for (Enumeration e = selectElementName.keys(); e.hasMoreElements();) {
         String key = (String) e.nextElement();
-        ((StyleSheet) selectElementName.get(key)).dump(key + current, finished);
+        ((StyleSheet) selectElementName.get(key)).dump(key + current);
       }
     }
 
@@ -818,8 +768,7 @@ public class StyleSheet {
 
         if (type == SELECT_ATTRIBUTE_NAME) {
           p.append(']');
-          ((StyleSheet) selectAttributeValue.elementAt(i)).dump(p.toString(),
-              finished);
+          ((StyleSheet) selectAttributeValue.elementAt(i)).dump(p.toString());
         } else {
           switch (type) {
             case SELECT_ATTRIBUTE_VALUE:
@@ -835,19 +784,18 @@ public class StyleSheet {
           Hashtable valueMap = (Hashtable) selectAttributeValue.elementAt(i);
           for (Enumeration e = valueMap.keys(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
-            ((StyleSheet) valueMap.get(key)).dump(
-                p.toString() + '"' + key + "\"]", finished);
+            ((StyleSheet) valueMap.get(key)).dump(p.toString() + '"' + key + "\"]");
           }
         }
       }
     }
 
-    if (selectAncestor != null) {
-      selectAncestor.dump("", " " + current + finished);
+    if (selectDescendants != null) {
+      selectDescendants.dump(current + " ");
     }
 
-    if (selectParent != null) {
-      selectParent.dump("", " > " + current + finished);
+    if (selectChild != null) {
+      selectChild.dump(current + " > ");
     }
   }
 }

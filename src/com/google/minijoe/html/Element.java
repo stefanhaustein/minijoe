@@ -523,7 +523,7 @@ public class Element {
    * @param styleSheet the style sheet to apply.
    * @param queue style queue used internally, must be set to new Vector()
    */
-  public void apply(StyleSheet styleSheet, Vector queue) {
+  public void apply(Vector applyHere, Vector applyAnywhere) {
 
     if (htmlWidget.styleOutdated) {
       return;
@@ -532,9 +532,21 @@ public class Element {
     Style previousStyle = computedStyle;
     Style style = new Style();
 
-    queue.setSize(0);
+    Vector queue = new Vector();
+    Vector childStyles = new Vector();
+    Vector descendantStyles = new Vector();
 
-    styleSheet.collectStyles(this, queue);
+    int size = applyHere.size();
+    for (int i = 0; i < size; i++) {
+      StyleSheet styleSheet = (StyleSheet) applyHere.elementAt(i);
+      styleSheet.collectStyles(this, queue, childStyles, descendantStyles);
+    }
+    size = applyAnywhere.size();
+    for (int i = 0; i < size; i++) {
+      StyleSheet styleSheet = (StyleSheet) applyAnywhere.elementAt(i);
+      descendantStyles.addElement(styleSheet);
+      styleSheet.collectStyles(this, queue, childStyles, descendantStyles);
+    }
 
     for (int i = 0; i < queue.size(); i++) {
       style.set(((Style) queue.elementAt(i)));
@@ -558,7 +570,7 @@ public class Element {
 
     for (int i = 0; i < getChildCount(); i++) {
       if (getChildType(i) == Element.ELEMENT) {
-        getElement(i).apply(styleSheet, queue);
+        getElement(i).apply(childStyles, descendantStyles);
       }
     }
 
