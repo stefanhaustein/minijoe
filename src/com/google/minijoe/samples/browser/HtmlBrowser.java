@@ -160,7 +160,7 @@ public class HtmlBrowser extends MIDlet implements SystemRequestHandler, Command
         }
         Object res = s.htmlWidget.getResource(url, -1, null);
         if (res != null) {
-          source.addResource(url, res);
+          source.addResource(url, res, -1);
           return;
         }
       }
