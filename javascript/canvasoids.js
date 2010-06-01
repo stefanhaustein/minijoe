@@ -274,7 +274,7 @@ function step() {
 
       if (dx * dx + dy * dy < r.hitrange && blink == 0 && lives > 0) {
         blink = 1;
-        lifes -= 1;
+        lives -= 1;
         ship.x = w / 2;
         ship.y = h / 2;
         ship.dx = 0;
@@ -301,9 +301,9 @@ function step() {
   ctx.fillStyle = "#00ff00";
   drawString(0, 20, "" + score, "left");
   drawString(w, 20, "HI " + highscore, "right");
-  drawString(w, h - 5, "Ships: " + lifes, "right");
+  drawString(w, h - 5, "Ships: " + lives, "right");
 
-  if (lifes == 0) {
+  if (lives == 0) {
      drawString(w / 2, h / 2 - 10, "GAME OVER", "center");
      if (blink == 0) {
        drawString(w / 2, h / 2 + 10, "Press any key", "center");
@@ -319,9 +319,9 @@ function step() {
 document.onkeydown = function(e) {
   var keycode = e.keyCode;
 
-  if (lifes == 0) {
+  if (lives == 0) {
     if (blink == 0) {
-      lifes = 3;
+      lives = 3;
       score = 0;
       level = 0;
       nextLevel();

@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/me4se"/>
 	<classpathentry kind="lib" path="lib/kxml2-min-2.3.0.jar"/>
+	 <classpathentry kind="con" path="org.elipse.mtj.JavaMEContainer/Sun Java(TM) Wireless Toolkit 2.5.2 for CLDC/DefaultColorPhone"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

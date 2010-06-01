@@ -984,7 +984,7 @@ public class Style {
         int id;
         if (idObj == null) {
           tokenizer.debug("unrecognized property");
-          id = UNRECOGNIZED_PROPERTY;
+          id = UNRECOGNIZED_PROPERTY_ID;
         } else {
           id = idObj.intValue();
         }
@@ -1020,7 +1020,7 @@ public class Style {
               if (v != null) {
                 set(id, (int) v.longValue(),
                     (byte) (v.longValue() >>> 32), pos);
-              } else if (id != UNRECOGNIZED_PROPERTY && id != MULTIVALUE_FONT) {
+              } else if (id != UNRECOGNIZED_PROPERTY_ID && id != MULTIVALUE_FONT) {
                 tokenizer.debug("Unrecognized value '" + v + "' for property " + name);
               }
               break;

@@ -250,7 +250,7 @@ public class ResourceRequester implements Runnable {
         case SystemRequestHandler.TYPE_IMAGE:
           try {
             Image image = Image.createImage(responseData, 0, responseData.length);
-            screen.htmlWidget.addResource(url, image);
+            screen.htmlWidget.addResource(url, image, SystemRequestHandler.TYPE_IMAGE);
           } catch (IllegalArgumentException e) {
             System.err.println("Img fmt err: " + e);
           }
@@ -258,11 +258,17 @@ public class ResourceRequester implements Runnable {
 
         case SystemRequestHandler.TYPE_STYLESHEET:
           String styleSheet = new String(responseData, "UTF-8");
-          screen.htmlWidget.addResource(url, styleSheet);
+          screen.htmlWidget.addResource(url, styleSheet, SystemRequestHandler.TYPE_STYLESHEET);
           break;
+          
+        case SystemRequestHandler.TYPE_SCRIPT:
+            String javascript = new String(responseData, "UTF-8");
+            //System.out.println("adding script res..."+javascript);
+            screen.htmlWidget.addResource(url, javascript, SystemRequestHandler.TYPE_SCRIPT);
+            break;
 
         default:
-          screen.htmlWidget.addResource(url, responseData);
+          screen.htmlWidget.addResource(url, responseData, -1);
           break;
       }
     } catch (IOException e) {

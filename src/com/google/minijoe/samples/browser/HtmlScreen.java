@@ -139,11 +139,17 @@ public class HtmlScreen extends Canvas implements Window {
 	} else if (keyCode == Widget.KEYCODE_LSK) {
 		browser.menu();
 	} else {
+		//Give any JS registered key evt handler first go at the evt 
+		this.htmlWidget.callJsEventHandler(Widget.KEY_PRESSED, keyCode, getGameAction(keyCode));
+		
 		root.dispatchKeyEvent(Widget.KEY_PRESSED, keyCode, getGameAction(keyCode));
 	}
   }
   
   protected void keyReleased(int keyCode) {
+	//Give any JS registered key evt handler first go at the evt 
+	this.htmlWidget.callJsEventHandler(Widget.KEY_RELEASED, keyCode, getGameAction(keyCode));
+		
     root.dispatchKeyEvent(Widget.KEY_RELEASED, keyCode, getGameAction(keyCode));
   }
   

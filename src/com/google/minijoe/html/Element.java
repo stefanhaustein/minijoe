@@ -14,16 +14,17 @@
 
 package com.google.minijoe.html;
 
-import com.google.minijoe.html.css.Style;
-import com.google.minijoe.html.css.StyleSheet;
-
-import org.kxml2.io.KXmlParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import com.google.minijoe.html.css.Style;
+import com.google.minijoe.html.css.StyleSheet;
+
 
 /**
  * Stylable XML/HTML Element representation. Also used to represent an anonymous
@@ -99,7 +100,7 @@ public class Element {
     setFlags("p", FLAG_BLOCK  | FLAG_PARAGRAPH);
     setFlags("param", FLAG_EMPTY);
     setFlags("pre", FLAG_BLOCK);
-    setFlags("script", FLAG_IGNORE_CONTENT | TAG_SCRIPT);
+    setFlags("script", TAG_SCRIPT);
     setFlags("style", FLAG_ADD_COMMENTS | TAG_STYLE);
     setFlags("table", FLAG_BLOCK);
     setFlags("title", TAG_TITLE);
@@ -233,6 +234,32 @@ public class Element {
   public String getText(int index) {
     return (String) content.elementAt(index);
   }
+  
+  /**
+   * Returns the first child which has a matching id attribute.
+   * Searches recursively through all children.
+   * 
+   * @param id
+   * @return First child with matching id attribute
+   */
+  public Element getChildById(String id) {
+	 int childCount = this.getChildCount();
+	  Element currChild = null;
+	  for (int i=0; i < childCount; i++) {
+		  if (this.getChildType(i) == this.ELEMENT) {
+			  currChild = this.getElement(i);			  
+			  if (currChild != null && 
+					  id.equals(currChild.getAttributeValue("id"))
+					  ) {
+				  break;
+			  } else if (currChild.getChildCount() > 0) {
+				  currChild.getChildById(id);
+			  }				  
+		  }
+	  }
+	  return currChild;
+  }
+
 
   /**
    * Returns the attribute value interpreted as a boolean.
@@ -503,6 +530,22 @@ public class Element {
         if (href != null) {
           htmlWidget.baseURL = href;
         }
+      case TAG_SCRIPT:
+  		String srcAttr = getAttributeValue("src");
+  		if (srcAttr != null && !"".equals(srcAttr.trim())) {
+  			String srcUrl = htmlWidget.getAbsoluteUrl(srcAttr);
+  			if (srcAttr != null) {
+  				this.htmlWidget.getResource(srcUrl,
+  						SystemRequestHandler.TYPE_SCRIPT, this);
+  			}
+
+  		} else {
+  			String jsText = getText();
+  			if (jsText != null && jsText.trim() != "") {
+  				this.htmlWidget.evalJS(jsText);
+  			}
+  		}
+  		break;
     }
   }
 
@@ -777,4 +820,9 @@ public class Element {
   public void setParent(Element parent) {
     this.parent = parent;    
   }
+  
+  public HtmlWidget getHtmlWidget() {
+       return htmlWidget;
+  }
+
 }

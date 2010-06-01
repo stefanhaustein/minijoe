@@ -14,12 +14,10 @@
 
 package com.google.minijoe.html;
 
-import com.google.minijoe.common.Util;
-import com.google.minijoe.html.css.StyleSheet;
-import com.google.minijoe.html.uibase.Widget;
-
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Graphics;
@@ -27,6 +25,13 @@ import javax.microedition.lcdui.Image;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.google.minijoe.common.Util;
+import com.google.minijoe.compiler.Eval;
+import com.google.minijoe.html.css.StyleSheet;
+import com.google.minijoe.html.uibase.Widget;
+import com.google.minijoe.html5.js.JsWindow;
+import com.google.minijoe.sys.JsFunction;
 
 /**
  * Widget class representing a HTML document (or snippet). First builds up a
@@ -115,11 +120,16 @@ public class HtmlWidget extends BlockWidget  {
   /** Enable desktop rendering for CSS debugging purposes. */
   private boolean desktopRendering;
 
+  public JsWindow globalScope;
+  
   /** 
    * Table mapping element names to ElementHandler instances for custom element
    * support.
    */
   Hashtable elementHandlers;
+
+
+  private Thread jsTimerThread;
 
   /**
    * returns true if the media string is null or contains "all" or "screen"; 
@@ -151,6 +161,9 @@ public class HtmlWidget extends BlockWidget  {
     if (documentUrl != null) {
       this.documentUrl = title = baseURL = documentUrl;
     }
+    this.globalScope = new JsWindow(this);
+    this.jsTimerThread = new Thread(this.globalScope);
+    this.jsTimerThread.start();
   }
 
   public void setUrl(String url) {
@@ -254,7 +267,7 @@ public class HtmlWidget extends BlockWidget  {
    * Processes links by calling the request handler.
    */
   public Widget dispatchKeyEvent(int type, int keyCode, int action) {
-
+	  
     Widget handled = super.dispatchKeyEvent(type, keyCode, action);
     if (handled != null || type != KEY_PRESSED) {
       return handled;
@@ -310,6 +323,10 @@ public class HtmlWidget extends BlockWidget  {
     }
     w.scrollIntoView();
   }
+  
+  public Widget getWidgetForLabel(String label) {
+	  return (Widget) labels.get(label);
+  }
 
   /**
    * Converts a URL to an absolute URL, using the document base URL. If the URL
@@ -335,9 +352,7 @@ public class HtmlWidget extends BlockWidget  {
     }
     synchronized (styleSheet) {
       styleOutdated = false;
-      Vector applyAnywhere = new Vector();
-      applyAnywhere.addElement(styleSheet);
-      element.apply(new Vector(), applyAnywhere);
+      element.apply(styleSheet, new Vector());
     }
     if (!OPTIMIZE || needsBuild) {
       synchronized (this) {
@@ -355,15 +370,20 @@ public class HtmlWidget extends BlockWidget  {
    * 
    * @param url URL of the received resource
    * @param resource the received resource object
+   * @param resource type as defined in SystemRequestHandler.TYPE_XXX, use -1 for unknown
    */
-  public void addResource(String resUrl, Object resource) {
+  public void addResource(String resUrl, Object resource, int resType) {
 
     if (resource instanceof String) {
-      styleOutdated = OPTIMIZE;
-      synchronized (styleSheet) {
-        styleSheet.read(this, resUrl, (String) resource);
+      if (resType == SystemRequestHandler.TYPE_SCRIPT) {
+    	 this.evalJS((String)resource);    	 
+      } else {
+	      styleOutdated = OPTIMIZE;
+	      synchronized (styleSheet) {
+	        styleSheet.read(this, resUrl, (String) resource);
+	      }
+	      applyStyle();
       }
-      applyStyle();
     } else if (resource instanceof Image) {
       Vector targets = (Vector) pendingResourceRequests.get(resUrl);
       if (targets != null) {
@@ -444,5 +464,41 @@ public class HtmlWidget extends BlockWidget  {
    */
   public String getBaseURL() {
     return baseURL;
+  }
+
+  /**
+   * Evaluates the given js source 
+   * 
+   * @param jsSourceText
+   */
+  public void evalJS(String jsSourceText) {
+	  try {
+		  System.out.println("evaljs"+this.globalScope);
+		  Eval.eval((String)jsSourceText, this.globalScope);
+		  this.invalidate(true);
+	  } catch (Exception e) {
+			e.printStackTrace();
+	  }
+  }
+  
+  /**
+   * 
+   * @param type
+   * @param evtCode either the keycode or mousebutton
+   * @return
+   */
+  public boolean callJsEventHandler(int type, int evtCode, int action) {
+	  switch(type) {
+	  	case Widget.KEY_PRESSED:
+	  		Object keydown = this.globalScope.getObject("onkeydown");
+			if (keydown != null && keydown instanceof JsFunction) {
+				System.out.println("calling keydown evt func"+keydown);
+				this.globalScope.keyEvent((JsFunction)keydown, evtCode, action);
+			}
+	  		break;
+	  		
+	  }
+	  
+	  return true;
   }
 }

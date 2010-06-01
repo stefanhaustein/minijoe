@@ -55,6 +55,11 @@ public interface SystemRequestHandler {
   static final int TYPE_STYLESHEET = 3;
   
   /**
+   * Request for Javascript script
+   */
+  static final int TYPE_SCRIPT = 4;
+  
+  /**
    * Callback method called by the HTML document to request a resource.
    * 
    * @param source the HTML document requesting the resource
