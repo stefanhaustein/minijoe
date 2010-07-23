@@ -783,8 +783,24 @@ public class JsObject  {
             stack.getString(sp).compareTo(stack.getString(sp + 2)));
         break;
         
-      case ID_MATCH:
       case ID_REPLACE:
+        s = stack.getString(sp);
+        find = stack.getString(sp + 2);
+        String replace = stack.getString(sp + 3);
+        if(!find.equals("")) {
+          StringBuffer sb = new StringBuffer(s);
+          int length = find.length();
+
+          // Parse nodes into vector
+          while ((index = sb.toString().indexOf(find)) >= 0) {
+            sb.delete(index, index + length);
+            sb.insert(index, replace);
+          }
+          stack.setObject(sp, sb.toString());
+          sb = null;
+        }
+        break;
+      case ID_MATCH:
       case ID_SEARCH:
         throw new RuntimeException("Regexp NYI");
         
