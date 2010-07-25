@@ -195,6 +195,7 @@ public class JsObject  {
       .addVar("replace", new JsFunction(ID_REPLACE, 2))
       .addVar("search", new JsFunction(ID_SEARCH, 1))
       .addVar("slice", new JsFunction(ID_SLICE, 2))
+      .addVar("split", new JsFunction(ID_SPLIT, 2))
       .addVar("substring", new JsFunction(ID_SUBSTRING, 2))
       .addVar("toLowerCase", new JsFunction(ID_TO_LOWER_CASE, 0))
       .addVar("toLocaleLowerCase", new JsFunction(ID_TO_LOCALE_LOWER_CASE, 0))
@@ -831,8 +832,8 @@ public class JsObject  {
         s = stack.getString(sp);
         String sep = stack.getString(sp + 2);
         double limit = stack.getNumber(sp + 3);
-        if (Double.isNaN(limit)) {
-          limit = Integer.MAX_VALUE;
+        if (Double.isNaN(limit) || limit < 1) {
+          limit = Double.MAX_VALUE;
         }
         
         JsArray a = new JsArray();
