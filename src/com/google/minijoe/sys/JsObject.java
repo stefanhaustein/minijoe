@@ -145,13 +145,13 @@ public class JsObject  {
   static final int ID_SQRT2 = 84;
   static final int ID_SQRT2_SET = 85;
   
-  static final int TYPE_UNDEFINED = 0;
-  static final int TYPE_NULL = 1;
-  static final int TYPE_OBJECT = 2;
-  static final int TYPE_BOOLEAN = 3;
-  static final int TYPE_NUMBER = 4;
-  static final int TYPE_STRING = 5;
-  static final int TYPE_FUNCTION = 6;
+  public static final int TYPE_UNDEFINED = 0;
+  public static final int TYPE_NULL = 1;
+  public static final int TYPE_OBJECT = 2;
+  public static final int TYPE_BOOLEAN = 3;
+  public static final int TYPE_NUMBER = 4;
+  public static final int TYPE_STRING = 5;
+  public static final int TYPE_FUNCTION = 6;
   
   /** Javascript type names as returned by the typeof operator. Note
    * that TYPE_NULL and TYPE_OBJECT are mapped to object both. */
