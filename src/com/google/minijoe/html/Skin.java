@@ -25,7 +25,6 @@ import com.google.minijoe.html.uibase.GraphicsUtils;
  * 
  * @author Peter Baldwin
  * @author Stefan Haustein
- * @author Erik Wolsheimer
  */
 public class Skin {
 

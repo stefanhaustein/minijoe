@@ -27,7 +27,6 @@ import com.google.minijoe.common.Util;
  * 
  * @author Peter Baldwin
  * @author Stefan Haustein
- * @author Erik Wolsheimer
  */
 public class GraphicsUtils {
 

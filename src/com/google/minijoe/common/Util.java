@@ -22,7 +22,6 @@ import java.util.Calendar;
  *  
  * @author Peter Baldwin
  * @author Stefan Haustein
- * @author Erik Wolsheimer
  */
 public class Util {
 
