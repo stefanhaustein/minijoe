@@ -20,25 +20,25 @@ package com.google.minijoe.sys;
  */
 public class JsError extends JsObject {
   
-  static JsObject ERROR_PROTOTYPE = 
+  final static JsObject ERROR_PROTOTYPE =
       new JsObject(OBJECT_PROTOTYPE).addVar("name", "Error");
   
-  static JsObject EVAL_ERROR_PROTOTYPE = 
+  final static JsObject EVAL_ERROR_PROTOTYPE =
       new JsObject(ERROR_PROTOTYPE).addVar("name", "EvalError");
 
-  static JsObject RANGE_ERROR_PROTOTYPE = 
+  final static JsObject RANGE_ERROR_PROTOTYPE =
       new JsObject(ERROR_PROTOTYPE).addVar("name", "RangeError");
 
-  static JsObject REFERENCE_ERROR_PROTOTYPE = 
+  final static JsObject REFERENCE_ERROR_PROTOTYPE =
       new JsObject(ERROR_PROTOTYPE).addVar("name", "ReferenceError");
 
-  static JsObject SYNTAX_ERROR_PROTOTYPE = 
+  final static JsObject SYNTAX_ERROR_PROTOTYPE =
       new JsObject(ERROR_PROTOTYPE).addVar("name", "SyntaxError");
   
-  static JsObject TYPE_ERROR_PROTOTYPE = 
+  final static JsObject TYPE_ERROR_PROTOTYPE =
       new JsObject(ERROR_PROTOTYPE).addVar("name", "TypeError");
 
-  static JsObject URI_ERROR_PROTOTYPE = 
+  final static JsObject URI_ERROR_PROTOTYPE =
       new JsObject(ERROR_PROTOTYPE).addVar("name", "URIError");
 
   /** 
