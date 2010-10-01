@@ -209,6 +209,8 @@ public class JsObject  {
   /** Prototype chain */
   protected JsObject __proto__;
   
+  /** Hashtable holding the reverse mapping for native methods. */
+  private Hashtable natives = new Hashtable(10);
   /** Hashtable holding the properties and values of this object. */
   private Hashtable data;
   /** Parent object in scope chain */
@@ -223,7 +225,7 @@ public class JsObject  {
   public JsObject(JsObject __proto__){
     this.__proto__ = __proto__;
   }
-  
+
   /** 
    * Return the raw value of a property, taking the prototype chain into account, but not the
    * scope chain or native getters or setters.
@@ -349,6 +351,17 @@ public class JsObject  {
       data = new Hashtable();
     }
     data.put(prop, v == null ? UNDEFINED_PLACEHOLDER : v);
+    if (v instanceof JsFunction && ((JsFunction) v).index != ID_NOOP) {
+      String key = getNativeKey(((JsFunction) v).factoryTypeId, ((JsFunction) v).index);
+      if(key != null) {
+        if(natives.containsKey(key)) {
+          System.out.println("Duplicate native function ID '" +
+            ((JsFunction) v).index + "' detected for method '" + prop + "'.");
+        } else {
+          natives.put(key, prop);
+        }
+      }
+    }
     return this;
   }
 
@@ -358,7 +371,27 @@ public class JsObject  {
   public JsObject addNative(String prop, int nativePropertyId, int parCount) {
     return addVar(prop, new JsFunction(nativePropertyId, parCount));
   }
-  
+
+  /**
+   * Get the function's name for a particular ID.
+   */
+  public String getFunctionName(int factoryTypeId, int index) {
+    return getFunctionNameImpl(getNativeKey(factoryTypeId, index));
+  }
+
+  private String getFunctionNameImpl(String key) {
+    String prop = (String) natives.get(key);
+    if (prop == null && __proto__ != null) {
+      prop = __proto__.getFunctionNameImpl(key);
+    }
+    return prop;
+  }
+
+  private String getNativeKey(int factoryTypeId, int index) {
+    return (factoryTypeId <= JsSystem.FACTORY_ID_OBJECT) ?
+      JsSystem.FACTORY_ID_OBJECT + ":" + index : factoryTypeId + ":" + index;
+  }
+
   /** 
    * Set the given property to a numeric value.
    */
@@ -420,11 +453,15 @@ public class JsObject  {
     //TODO check whether this covers dontdelete sufficiently
   
     Object old = data.get(key);
-    if (old instanceof JsFunction && ((JsFunction) old).getParameterCount() == -1){
+    boolean isFunc = old instanceof JsFunction;
+    if (isFunc && ((JsFunction) old).getParameterCount() == -1){
       return false;
     }
-    
+
     data.remove(key);
+    if(isFunc) {
+        natives.remove(getNativeKey(((JsFunction) old).factoryTypeId, ((JsFunction) old).index));
+    }
     return true;
   }
   
