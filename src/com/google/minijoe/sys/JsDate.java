@@ -68,10 +68,10 @@ public class JsDate extends JsObject {
    * Prototype for JS Date instances.
    */
   public static final JsObject DATE_PROTOTYPE = new JsDate(OBJECT_PROTOTYPE)
-      .addVar("toDateString", new JsFunction(ID_TO_TIME_STRING, 0))
-      .addVar("toTimeSring", new JsFunction(ID_TO_TIME_STRING, 0))
-      .addVar("toLocaleDateString", new JsFunction(ID_TO_TIME_STRING, 0))
-      .addVar("toLocaleTimeString", new JsFunction(ID_TO_TIME_STRING, 0))
+      .addVar("toDateString", new JsFunction(ID_TO_DATE_STRING, 0))
+      .addVar("toTimeString", new JsFunction(ID_TO_TIME_STRING, 0))
+      .addVar("toLocaleDateString", new JsFunction(ID_TO_LOCALE_DATE_STRING, 0))
+      .addVar("toLocaleTimeString", new JsFunction(ID_TO_LOCALE_TIME_STRING, 0))
       .addVar("getTime", new JsFunction(ID_GET_TIME, 0))
       .addVar("getFullYear", new JsFunction(ID_GET_FULL_YEAR, 0))
       .addVar("getUTCFullYear", new JsFunction(ID_GET_UTC_FULL_YEAR, 0))
