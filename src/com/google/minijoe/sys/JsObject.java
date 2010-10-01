@@ -434,28 +434,28 @@ public class JsObject  {
    * The assignement value for a setter is stored at stack[sp+0]. 
    */
   public void evalNative(int index, JsArray stack, int sp, int parCount) {
-    switch(index){
-      
+    Object obj;
+    switch(index) {
       // object methods
       
       case ID_NOOP:
         break;
         
       case ID_INIT_OBJECT:
-        Object v = stack.getObject(sp + 2);
+        obj = stack.getObject(sp + 2);
         if (isConstruction(stack, sp)){
-          if (v instanceof Boolean || v instanceof Double || 
-              v instanceof String) {
-            value = v;
-          } else if (v instanceof JsObject){
-            stack.setObject(sp - 1,  v);
+          if (obj instanceof Boolean || obj instanceof Double ||
+              obj instanceof String) {
+            value = obj;
+          } else if (obj instanceof JsObject){
+            stack.setObject(sp - 1,  obj);
           }
           // otherwise, don't do anything -- regular constructor call
         } else {
-          if (v == null || v == JsSystem.JS_NULL) {
+          if (obj == null || obj == JsSystem.JS_NULL) {
             stack.setObject(sp, new JsObject(OBJECT_PROTOTYPE));
           } else {
-            stack.setObject(sp, JsSystem.toJsObject(v));
+            stack.setObject(sp, JsSystem.toJsObject(obj));
           }
         }
         break;
@@ -471,10 +471,10 @@ public class JsObject  {
         break;
         
       case ID_IS_PROTOTYPE_OF:
-        v = stack.getObject(sp + 2);
+        obj = stack.getObject(sp + 2);
         stack.setBoolean(sp, false);
-        while (v instanceof JsObject){
-          if (v == this) {
+        while (obj instanceof JsObject){
+          if (obj == this) {
             stack.setBoolean(sp, true);
             break;
           }
@@ -482,8 +482,8 @@ public class JsObject  {
         break;
         
       case ID_PROPERTY_IS_ENUMERABLE:
-        v = getRawInPrototypeChain(stack.getString(sp + 2));
-        stack.setBoolean(sp, v != null && !(v instanceof JsFunction));
+        obj = getRawInPrototypeChain(stack.getString(sp + 2));
+        stack.setBoolean(sp, obj != null && !(obj instanceof JsFunction));
         break;
         
       case ID_VALUE_OF:
@@ -642,10 +642,26 @@ public class JsObject  {
         stack.setBoolean(sp, !Double.isInfinite(d) && !Double.isNaN(d));
         break;
 
-      //TODO Implement
       case ID_DECODE_URI:
-      case ID_DECODE_URI_COMPONENT:
+        obj = stack.getObject(sp + 2);
+        if(obj instanceof byte[]) {
+          stack.setObject(sp, JsSystem.decodeURI((byte[]) obj));
+        } else {
+          stack.setObject(sp, JsSystem.decodeURI(obj.toString()));
+        }
+        break;
+
       case ID_ENCODE_URI:
+        obj = stack.getObject(sp + 2);
+        if(obj instanceof byte[]) {
+          stack.setObject(sp, JsSystem.encodeURI((byte[]) obj));
+        } else {
+          stack.setObject(sp, JsSystem.encodeURI(obj.toString()));
+        }
+        break;
+
+      //TODO Implement
+      case ID_DECODE_URI_COMPONENT:
       case ID_ENCODE_URI_COMPONENT:
         throw new RuntimeException("NYI");
         

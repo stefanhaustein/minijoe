@@ -301,7 +301,7 @@ public class JsSystem implements JsObjectFactory {
   /**
    * source: http://en.wikipedia.org/wiki/Exponential_function
    */
-  public static final double exp(double x){
+  public static double exp(double x){
     long n = (long) Math.floor(x / LN2);
     double u = x - n * LN2;
     double m = 1;
@@ -323,7 +323,7 @@ public class JsSystem implements JsObjectFactory {
   /** 
    * Calculates logarithm to the basis e for x. Algorithm from Wikipedia.
    */
-  public static final double ln(double x){
+  public static double ln(double x){
     return Math.PI / (2.0 * avg(1.0, 4.0 / (x * (1L<<M)))) - LN2 * M;
   }
   
@@ -331,7 +331,7 @@ public class JsSystem implements JsObjectFactory {
    * Performs multiplications for integer exponents. In all other cases,
    * exp(y * ln(x)) is calculated.
    */
-  public static final double pow(double x, double y){
+  public static double pow(double x, double y){
     long n = (long) y;
     if (y > 0 && y == n) {
       double result = 1;
@@ -470,12 +470,81 @@ public class JsSystem implements JsObjectFactory {
     }
   }
   
-  public static final double avg(double a, double b) {
+  public static double avg(double a, double b) {
    for (int i = 0; i < 10; i++) {
       double t = (a + b) / 2.0;
       b = Math.sqrt(a * b);
       a = t;
     }
     return (a + b) / 2;
+  }
+
+  public static String encodeURI(byte[] bytes) {
+    StringBuffer result = new StringBuffer(bytes.length);
+    for(int i = 0; i < bytes.length; i++) {
+      switch (bytes[i]) {
+        // Based on article: http://en.wikipedia.org/wiki/Percent-encoding
+        case ' ':  result.append('+');   break;
+        case '!':  result.append("%21"); break;
+        case '"':  result.append("%22"); break;
+        case '#':  result.append("%23"); break;
+        case '$':  result.append("%24"); break;
+        case '%':  result.append("%25"); break;
+        case '&':  result.append("%26"); break;
+        case '\'': result.append("%27"); break;
+        case '(':  result.append("%28"); break;
+        case ')':  result.append("%29"); break;
+        case '*':  result.append("%2A"); break;
+        case '+':  result.append("%2B"); break;
+        case ',':  result.append("%2C"); break;
+        case '/':  result.append("%2F"); break;
+        case ':':  result.append("%3A"); break;
+        case ';':  result.append("%3B"); break;
+        case '<':  result.append("%3C"); break;
+        case '=':  result.append("%3D"); break;
+        case '>':  result.append("%3E"); break;
+        case '?':  result.append("%3F"); break;
+        case '@':  result.append("%40"); break;
+        case '[':  result.append("%5B"); break;
+        case '\\': result.append("%5C"); break;
+        case ']':  result.append("%5D"); break;
+        case '^':  result.append("%5E"); break;
+        default:   result.append((char) bytes[i]);
+      }
+    }
+    return result.toString();
+  }
+
+  public static String encodeURI(String string) {
+    return encodeURI(string.getBytes());
+  }
+
+  public static String decodeURI(byte[] bytes) {
+    StringBuffer result = new StringBuffer(bytes.length);
+    for(int i = 0; i < bytes.length; i++) {
+      switch (bytes[i]) {
+        case '+':
+          result.append(' ');
+          break;
+        case '%':
+          if(i + 2 < bytes.length) {
+            int next1 = Character.digit((char) bytes[i + 1], 16);
+            int next2 = Character.digit((char) bytes[i + 2], 16);
+            if(next1 > -1 && next2 > -1) {
+              int b = (next1 << 4) + next2;
+              result.append((char) b);
+              i += 2;
+              break;
+            }
+          }
+        default:
+          result.append((char) bytes[i]);
+      }
+    }
+    return result.toString();
+  }
+
+  public static String decodeURI(String string) {
+    return decodeURI(string.getBytes());
   }
 }
