@@ -150,7 +150,7 @@ public class JsFunction extends JsObject {
   private JsObjectFactory factory;
 
   /** Object factory id if this is a native constructor. */
-  private int factoryTypeId;
+  int factoryTypeId;
 
   /** Evaluation context for this function. */
   private JsObject context;
