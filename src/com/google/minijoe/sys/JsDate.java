@@ -63,6 +63,7 @@ public class JsDate extends JsObject {
   private static final int ID_SET_FULL_YEAR = 940;
   private static final int ID_SET_UTC_FULL_YEAR = 941;
   private static final int ID_TO_UTC_STRING = 942;
+  private static final int ID_TO_GMT_STRING = 943;
 
   /**
    * Prototype for JS Date instances.
@@ -106,7 +107,7 @@ public class JsDate extends JsObject {
       .addVar("setFullYear", new JsFunction(ID_SET_FULL_YEAR, 1))
       .addVar("setUTCFullYear", new JsFunction(ID_SET_UTC_FULL_YEAR, 1))
       .addVar("toUTCString", new JsFunction(ID_TO_UTC_STRING, 0))
-      .addVar("toGMTString", new JsFunction(ID_TO_UTC_STRING, 0));
+      .addVar("toGMTString", new JsFunction(ID_TO_GMT_STRING, 0));
 
   Calendar time = Calendar.getInstance();
 
@@ -342,6 +343,7 @@ public class JsDate extends JsObject {
         break;
 
       case ID_TO_UTC_STRING:
+      case ID_TO_GMT_STRING:
         stack.setObject(sp, toString(true, true, true));
         break;
 
