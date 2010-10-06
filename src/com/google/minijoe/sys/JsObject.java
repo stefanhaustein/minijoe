@@ -432,9 +432,23 @@ public class JsObject  {
    * prototype or scope chain.
    */
   public Enumeration keys(){
-    return data == null ? new Hashtable().keys() : data.keys();
+    if(data == null) {
+      data = new Hashtable();
+    }
+    return data.keys();
   }
-  
+
+  /**
+   * Returns elements enumeration for this object only, not including the
+   * prototype or scope chain.
+   */
+  public Enumeration elements(){
+    if(data == null) {
+      data = new Hashtable();
+    }
+    return data.elements();
+  }
+
   /**
    * Returns a string representation of this.
    */
@@ -464,7 +478,17 @@ public class JsObject  {
     }
     return true;
   }
-  
+
+  /**
+   * Clears all properties.
+   */
+  public void clear(){
+    if(data != null) {
+      data.clear();
+      data = null;
+    }
+  }
+
   /** 
    * Execute java member implementation. Parameters for functions start at 
    * stack[sp+2]. Function and getter results are returned at stack[sp+0].
