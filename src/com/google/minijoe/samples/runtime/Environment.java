@@ -29,7 +29,7 @@ import javax.microedition.lcdui.Display;
 /**
  * Provides a simple JavaScript environment providing a set of 
  * methods and fields described in at
- * http://docs.google.com/a/google.com/Doc?id=cdj7wdfh_48dw4jmcfc
+ * https://docs.google.com/document/d/1E3y6OyVPJvWBZgXYc4QV0hv2yiFFr5Arp-uIZ5uFVxY/edit?usp=sharing
  * 
  * @author Stefan Haustein
  */
